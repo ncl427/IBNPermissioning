@@ -115,6 +115,11 @@ contract AccountRules is AccountRulesProxy, AccountRulesList {
         return addAll(accounts);
     }
 
+    //** ADDED this function for modifying permissioned account information */
+    function updateAccount(address account, string memory hashedInfo, bool enrolled  ) external onlyAdmin returns (bool) {
+        return updateIdentityInfo(account, hashedInfo, enrolled);
+    }
+
     function isAuthorizedAdmin(address user) private view returns (bool) {
         address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
 

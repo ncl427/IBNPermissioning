@@ -18,6 +18,12 @@ import "./AccountStorage.sol";
 
 
 contract AccountRulesList {
+
+    //** Added Struct for keeping extra information of the accounts */ 
+    struct identity {
+        string hashedInfo;
+        bool enrolled;
+    }
     event AccountAdded(
         bool accountAdded,
         address accountAddress
@@ -61,6 +67,11 @@ contract AccountRulesList {
         return allAdded;
     }
 
+    //** ADDED this function for modifying permissioned account information */
+    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled )  internal returns (bool) {
+        return accountStorage.updateIdentityInfo(_account, hashedInfo, enrolled);
+    }
+
     function remove(address _account) internal returns (bool) {
         return accountStorage.remove(_account);
     }
@@ -68,6 +79,13 @@ contract AccountRulesList {
     function getByIndex(uint index) public view returns (address account) {
         return accountStorage.getByIndex(index);
     }
+
+
+    //** ADDED this function for getting the information associated to an address */
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled  ) {
+        return accountStorage.getFullByAddress(account);
+    }
+
 
     function getAccounts() public view returns (address[] memory){
         return accountStorage.getAccounts();

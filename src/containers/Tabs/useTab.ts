@@ -11,6 +11,8 @@ import { PENDING_ADDITION, PENDING_REMOVAL, FAIL_ADDITION, FAIL_REMOVAL } from '
 
 type IdentAndStatus = {
   identifier: string;
+  hash?: string;
+  enrolled?: boolean;
   status: string;
 };
 

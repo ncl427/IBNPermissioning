@@ -29,7 +29,15 @@ contract AccountStorage {
 
     AccountIngress private ingressContract;
 
+
+     //** Added Struct for keeping extra information of the accounts */ 
+    struct identity {
+        string hashedInfo;
+        bool enrolled;
+    }
+
     address[] public allowlist;
+    mapping (address => identity) public permInfo; //Holds the information of the permissioned address
     mapping (address => uint256) private indexOf; //1 based indexing. 0 means non-existent
 
     constructor (AccountIngress _ingressContract) public {
@@ -67,15 +75,24 @@ contract AccountStorage {
         return indexOf[_account] != 0;
     }
 
+    //** MODIFIED this function for adding extra account info */
     function add(address _account) public onlyLatestVersion returns (bool) {
         if (indexOf[_account] == 0) {
+
+            identity memory newIdentity = identity({
+            hashedInfo: '',
+            enrolled: false
+            });
+
             allowlist.push(_account);
             indexOf[_account] = allowlist.length;
+            permInfo[_account] = newIdentity;
             return true;
         }
         return false;
     }
 
+    //** MODIFIED this function for deleting extra account info */
     function remove(address _account) public onlyLatestVersion returns (bool) {
         uint256 index = indexOf[_account];
         if (index > 0 && index <= allowlist.length) { //1-based indexing
@@ -89,13 +106,52 @@ contract AccountStorage {
             //shrink array
             allowlist.pop();
             indexOf[_account] = 0;
+            delete permInfo[_account];
             return true;
         }
         return false;
     }
+    //** ADDED this function for modifying permissioned account information */
+    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled ) public onlyLatestVersion returns (bool) {
+        string memory empty = "";
+        uint256 index = indexOf[_account];
+        if (index > 0) {
+            if (keccak256(bytes(hashedInfo)) == keccak256(bytes(empty))) {
+                updateIdentityEnroll(_account, enrolled);
+                return true;
+            } 
+             else
+            {
+                updateIdentity(_account, hashedInfo);
+                return true;
+            }
+
+        }
+        return false;
+
+    }
+    //**Update function helper */
+    function updateIdentityEnroll(address _account, bool enrolled ) private  {
+        identity storage updateId = permInfo[_account];
+        updateId.enrolled = enrolled;
+    }
+    //**Update function helper */
+    function updateIdentity(address _account, string memory hashedInfo ) private {
+        identity storage updateId = permInfo[_account];
+        updateId.hashedInfo = hashedInfo;
+        updateId.enrolled = true;
+    }
+
+    
+
 
     function getByIndex(uint index) public view returns (address account) {
         return allowlist[index];
+    }
+
+    //** ADDED this function for getting the information associated to an address */
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled  ) {
+        return (permInfo[account].hashedInfo, permInfo[account].enrolled);
     }
 
     function getAccounts() public view returns (address[] memory){
