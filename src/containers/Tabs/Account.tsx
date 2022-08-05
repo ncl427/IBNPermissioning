@@ -30,6 +30,8 @@ type AccountTabContainerProps = {
 type Account = {
   address: string;
   identifier: string;
+  hash?: string;
+  enrolled?: boolean;
   status: string;
 };
 
@@ -41,7 +43,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
     allowlist,
     (identifier: string) => ({ address: identifier })
   );
-
+  console.log(list);
   if (!!accountRulesContract) {
     const handleAdd = async (value: string) => {
       try {

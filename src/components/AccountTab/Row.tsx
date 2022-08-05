@@ -11,17 +11,34 @@ import styles from './styles.module.scss';
 
 type AccountRow = {
   address: string;
+  hash: string;
+  enrolled: boolean;
   status: string;
   isAdmin: boolean;
   deleteTransaction: (address: string) => void;
   openRemoveModal: (address: string) => void;
 };
 
-const AccountRow: React.FC<AccountRow> = ({ address, status, isAdmin, deleteTransaction, openRemoveModal }) => (
+const AccountRow: React.FC<AccountRow> = ({
+  address,
+  status,
+  hash,
+  enrolled,
+  isAdmin,
+  deleteTransaction,
+  openRemoveModal
+}) => (
   <TableRow className={styles.row}>
     <TableCell>
       <TextWithTooltip status={status} text={address} isAdmin={isAdmin} />
     </TableCell>
+    <TableCell>
+      <TextWithTooltip status={status} text={hash} isAdmin={isAdmin} />
+    </TableCell>
+    <TableCell>
+      <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />
+    </TableCell>
+
     <TableCell>
       <Grid container justifyContent="space-between" alignItems="center">
         {status === 'active' ? (

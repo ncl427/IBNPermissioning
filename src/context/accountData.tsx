@@ -4,11 +4,14 @@ import { accountRulesFactory } from '../chain/contracts/AccountRules';
 import { useNetwork } from './network';
 
 type Account = { address: string };
+type Identity = { hash: string };
 
 type ContextType =
   | {
       accountList: Account[];
       setAccountList: React.Dispatch<React.SetStateAction<Account[]>>;
+      hashList: Identity[];
+      setHashList: React.Dispatch<React.SetStateAction<Identity[]>>;
       accountReadOnly?: boolean;
       setAccountReadOnly: React.Dispatch<React.SetStateAction<boolean | undefined>>;
       accountRulesContract?: AccountRules;
@@ -30,6 +33,7 @@ const loadAccountData = (
     accountRulesContract.functions.isReadOnly().then(isReadOnly => setAccountReadOnly(isReadOnly));
     accountRulesContract.functions.getSize().then(listSize => {
       const listElementsPromises = [];
+      const listHashPromises = [];
       for (let i = 0; listSize.gt(i); i++) {
         listElementsPromises.push(accountRulesContract.functions.getByIndex(i));
       }
@@ -40,6 +44,26 @@ const loadAccountData = (
   }
 };
 
+/*
+ *const loadExtraData = (
+ *  accountRulesContract: AccountRules | undefined,
+ *  setHashList: (account: Identity[]) => void) => {
+ *  if (accountRulesContract === undefined) {
+ *    setHashList([]);
+ *  } else {
+ *    accountRulesContract.functions.getSize().then(listSize => {
+ *      const listElementsPromises = [];
+ *      const listHashPromises = [];
+ *      for (let i = 0; listSize.gt(i); i++) {
+ *        listElementsPromises.push(accountRulesContract.functions.getByIndex(i));
+ *      }
+ *      Promise.all(listElementsPromises).then(responses => {
+ *        setAccountList(responses.map(address => ({ address })));
+ *      });
+ *    });
+ *  }
+ *};
+ */
 /**
  * Provider for the data context that contains the account list
  * @param {Object} props Props given to the AccountDataProvider
@@ -49,6 +73,7 @@ const loadAccountData = (
  */
 export const AccountDataProvider: React.FC<{}> = props => {
   const [accountList, setAccountList] = useState<Account[]>([]);
+  const [hashList, setHashList] = useState<Identity[]>([]);
   const [accountReadOnly, setAccountReadOnly] = useState<boolean | undefined>(undefined);
   const [accountRulesContract, setAccountRulesContract] = useState<AccountRules | undefined>(undefined);
 
@@ -56,6 +81,8 @@ export const AccountDataProvider: React.FC<{}> = props => {
     () => ({
       accountList: accountList,
       setAccountList: setAccountList,
+      hashList: hashList,
+      setHashList: setHashList,
       accountReadOnly,
       setAccountReadOnly,
       accountRulesContract,
@@ -118,6 +145,8 @@ export const useAccountData = () => {
       .map(account => ({
         ...account,
         identifier: account.address.toLowerCase(),
+        hash: 'HASHED',
+        enrolled: false,
         status: 'active'
       }))
       .reverse();

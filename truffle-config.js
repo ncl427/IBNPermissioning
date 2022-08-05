@@ -12,6 +12,7 @@ var privateKey = process.env.BESU_NODE_PERM_KEY;
 
 /* The endpoint of the Ethereum node */
 var endpoint = process.env.BESU_NODE_PERM_ENDPOINT;
+console.log("THIS IS IT",endpoint)
 if (endpoint === undefined) {
   endpoint = "http://127.0.0.1:8545";
 }
