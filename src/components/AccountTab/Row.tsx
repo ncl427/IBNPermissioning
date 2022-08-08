@@ -11,7 +11,7 @@ import styles from './styles.module.scss';
 
 type AccountRow = {
   address: string;
-  hash: string;
+  hashedInfo: string;
   enrolled: boolean;
   status: string;
   isAdmin: boolean;
@@ -22,7 +22,7 @@ type AccountRow = {
 const AccountRow: React.FC<AccountRow> = ({
   address,
   status,
-  hash,
+  hashedInfo,
   enrolled,
   isAdmin,
   deleteTransaction,
@@ -33,7 +33,7 @@ const AccountRow: React.FC<AccountRow> = ({
       <TextWithTooltip status={status} text={address} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
-      <TextWithTooltip status={status} text={hash} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={hashedInfo} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
       <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />

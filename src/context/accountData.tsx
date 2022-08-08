@@ -41,7 +41,9 @@ const loadAccountData = (
       }
       Promise.all(listElementsPromises).then(responses1 => {
         listHashPromises = responses1.map(address => accountRulesContract.functions.getFullByAddress(address));
-        //setAccountList(responses.map(address => ({ address })));
+        //setAccountList(responses1.map(address => ({ address })));
+        //console.log("HASHEDInfo: ", listHashPromises );
+
         Promise.all(listHashPromises).then(responses2 => {
           // const zip = (a1: any[],a2: { [x: string]: any; }) => a1.map((x, i) => [x,a2[i]]);
           // const listIdentities = zip(responses1, responses2)
@@ -52,6 +54,7 @@ const loadAccountData = (
               idobject.address = responses1[i];
               idobject.enrolled = identity.enrolled;
               idobject.hashedInfo = identity.hashedInfo;
+              console.log('ACCOUNT', idobject);
               return idobject;
             })
           );
@@ -126,9 +129,17 @@ export const AccountDataProvider: React.FC<{}> = props => {
         setAccountRulesContract(contract);
         contract.removeAllListeners('AccountAdded');
         contract.removeAllListeners('AccountRemoved');
+        contract.removeAllListeners('AccountUpdated');
         contract.on('AccountAdded', (success, account, event) => {
           if (success) {
             loadAccountData(contract, setAccountList, setAccountReadOnly);
+            //console.log("LIST: ", accountList);
+          }
+        });
+        contract.on('AccountUpdated', (success, account, event) => {
+          if (success) {
+            loadAccountData(contract, setAccountList, setAccountReadOnly);
+            //console.log("LIST: ", accountList);
           }
         });
         contract.on('AccountRemoved', (success, account, event) => {
@@ -160,7 +171,7 @@ export const useAccountData = () => {
   }
 
   const { accountList, setAccountList, accountReadOnly, setAccountReadOnly, accountRulesContract } = context;
-
+  //console.log("LIST: ", accountList);
   useEffect(() => {
     loadAccountData(accountRulesContract, setAccountList, setAccountReadOnly);
   }, [accountRulesContract, setAccountList, setAccountReadOnly]);
@@ -170,12 +181,13 @@ export const useAccountData = () => {
       .map(account => ({
         ...account,
         identifier: account.address.toLowerCase(),
-        hash: account.hashedInfo,
-        enrolled: account.enrolled,
+        //hash: account.hashedInfo,
+        //enrolled: account.enrolled,
         status: 'active'
       }))
       .reverse();
   }, [accountList]);
+  //console.log("LIST1: ", formattedAccountList);
 
   const dataReady = useMemo(() => {
     return accountRulesContract !== undefined && accountReadOnly !== undefined && accountList !== undefined;
