@@ -24,8 +24,14 @@ contract AccountRulesList {
         string hashedInfo;
         bool enrolled;
     }
+    
     event AccountAdded(
         bool accountAdded,
+        address accountAddress
+    );
+
+    event AccountUpdated(
+        bool accountUpdated,
         address accountAddress
     );
 
