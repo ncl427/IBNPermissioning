@@ -9,6 +9,8 @@ import { useAdminData } from '../../context/adminData';
 // Utils
 import useTab from './useTab';
 import { errorToast } from '../../util/tabTools';
+import { deleteZitiIdentity } from '../../util/api';
+
 // Components
 import AccountTab from '../../components/AccountTab/AccountTab';
 import LoadingPage from '../../components/LoadingPage/LoadingPage';
@@ -83,6 +85,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
         openToast(value, SUCCESS, `Removal of account processed: ${value}`);
+        deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
         console.log('error', e);
