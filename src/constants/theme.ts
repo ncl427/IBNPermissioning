@@ -13,10 +13,13 @@ const baseColors = {
 export default {
   palette: {
     primary: {
-      main: baseColors.protocol
+      main: baseColors.green
+    },
+    undefined: {
+      main: baseColors.yellow
     },
     secondary: {
-      main: baseColors.green
+      main: baseColors.protocol
     }
   },
   typography: {
