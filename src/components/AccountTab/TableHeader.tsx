@@ -11,7 +11,7 @@ type TableHeader = {
 
 const TableHeader: React.FC<TableHeader> = ({ number, openAddModal, disabledAdd }) => (
   <Grid container alignItems="center" justifyContent="space-between">
-    <Typography variant="h2">Accounts ({number})</Typography>
+    <Typography variant="h2">Identities ({number})</Typography>
     <Button
       variant="contained"
       color="primary"
@@ -19,7 +19,7 @@ const TableHeader: React.FC<TableHeader> = ({ number, openAddModal, disabledAdd 
       disabled={disabledAdd}
       startIcon={<Icon>add_circle</Icon>}
     >
-      Add Account
+      Add Identity
     </Button>
   </Grid>
 );

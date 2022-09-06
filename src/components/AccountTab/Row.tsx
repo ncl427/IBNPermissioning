@@ -35,9 +35,9 @@ const AccountRow: React.FC<AccountRow> = ({
     <TableCell>
       <TextWithTooltip status={status} text={hashedInfo} isAdmin={isAdmin} />
     </TableCell>
-    <TableCell>
+    {/*     <TableCell>
       <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />
-    </TableCell>
+    </TableCell> */}
 
     <TableCell>
       <Grid container justifyContent="space-between" alignItems="center">

@@ -5,7 +5,7 @@ const objAuth = {
   password: 'admin'
 };
 
-const baseUrl = 'https://localhost:1280/edge/management/v1';
+const baseUrl = 'https://orchestrator.ncl.lab:1280/edge/management/v1';
 
 var user = '';
 var authorization = 0;
