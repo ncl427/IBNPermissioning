@@ -23,6 +23,7 @@ contract AccountRulesList {
     struct identity {
         string hashedInfo;
         bool enrolled;
+        string idType;
     }
     
     event AccountAdded(
@@ -74,8 +75,8 @@ contract AccountRulesList {
     }
 
     //** ADDED this function for modifying permissioned account information */
-    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled )  internal returns (bool) {
-        return accountStorage.updateIdentityInfo(_account, hashedInfo, enrolled);
+    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType )  internal returns (bool) {
+        return accountStorage.updateIdentityInfo(_account, hashedInfo, enrolled, idType);
     }
 
     function remove(address _account) internal returns (bool) {
@@ -88,7 +89,7 @@ contract AccountRulesList {
 
 
     //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled  ) {
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
         return accountStorage.getFullByAddress(account);
     }
 

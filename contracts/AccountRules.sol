@@ -116,8 +116,8 @@ contract AccountRules is AccountRulesProxy, AccountRulesList {
     }
 
     //** ADDED this function for modifying permissioned account information */
-    function updateAccount(address account, string memory hashedInfo, bool enrolled  ) external onlyAdmin onlyOnEditMode  returns (bool) {
-        bool updated = updateIdentityInfo(account, hashedInfo, enrolled);
+    function updateAccount(address account, string memory hashedInfo, bool enrolled, string memory idType  ) external onlyAdmin onlyOnEditMode  returns (bool) {
+        bool updated = updateIdentityInfo(account, hashedInfo, enrolled, idType);
         emit AccountUpdated(updated, account);
         return updated;
     }

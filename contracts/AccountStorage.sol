@@ -34,6 +34,7 @@ contract AccountStorage {
     struct identity {
         string hashedInfo;
         bool enrolled;
+        string idType;
     }
 
     address[] public allowlist;
@@ -81,7 +82,8 @@ contract AccountStorage {
 
             identity memory newIdentity = identity({
             hashedInfo: '',
-            enrolled: false
+            enrolled: false,
+            idType: 'undefined'
             });
 
             allowlist.push(_account);
@@ -112,7 +114,7 @@ contract AccountStorage {
         return false;
     }
     //** ADDED this function for modifying permissioned account information */
-    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled ) public onlyLatestVersion returns (bool) {
+    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType ) public onlyLatestVersion returns (bool) {
         string memory empty = "";
         uint256 index = indexOf[_account];
         if (index > 0) {
@@ -122,7 +124,7 @@ contract AccountStorage {
             } 
              else
             {
-                updateIdentity(_account, hashedInfo);
+                updateIdentity(_account, hashedInfo, idType);
                 return true;
             }
 
@@ -136,10 +138,11 @@ contract AccountStorage {
         updateId.enrolled = enrolled;
     }
     //**Update function helper */
-    function updateIdentity(address _account, string memory hashedInfo ) private {
+    function updateIdentity(address _account, string memory hashedInfo, string memory idType ) private {
         identity storage updateId = permInfo[_account];
         updateId.hashedInfo = hashedInfo;
         updateId.enrolled = true;
+        updateId.idType = idType;
     }
 
     
@@ -150,8 +153,8 @@ contract AccountStorage {
     }
 
     //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled  ) {
-        return (permInfo[account].hashedInfo, permInfo[account].enrolled);
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
+        return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType);
     }
 
     function getAccounts() public view returns (address[] memory){
