@@ -10,7 +10,7 @@ import EmptyRow from './EmptyRow';
 import styles from './styles.module.scss';
 
 type AccountTable = {
-  list: { address: string; status: string; hashedInfo: string; enrolled: boolean }[];
+  list: { address: string; status: string; hashedInfo: string; enrolled: boolean; idType: string }[];
   toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
   deleteTransaction: (identifier: string) => void;
   isAdmin: boolean;
@@ -30,18 +30,18 @@ const AccountTable: React.FC<AccountTable> = ({ list, toggleModal, deleteTransac
           <TableRow>
             <TableCell className={styles.headerCell}>Account Address</TableCell>
             <TableCell className={styles.headerCell}>Identity Hash</TableCell>
-            {/*             <TableCell className={styles.headerCell}>Type</TableCell>
-             */}{' '}
+            <TableCell className={styles.headerCell}>Type</TableCell>
             <TableCell className={styles.headerCell}>Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(({ address, status, hashedInfo, enrolled }) => (
+          {list.map(({ address, status, hashedInfo, enrolled, idType }) => (
             <AccountRow
               key={address}
               address={address}
               hashedInfo={hashedInfo}
               enrolled={enrolled}
+              idType={idType}
               status={status}
               isAdmin={isAdmin}
               deleteTransaction={deleteTransaction}

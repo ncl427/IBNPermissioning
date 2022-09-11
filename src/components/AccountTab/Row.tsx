@@ -13,6 +13,7 @@ type AccountRow = {
   address: string;
   hashedInfo: string;
   enrolled: boolean;
+  idType: string;
   status: string;
   isAdmin: boolean;
   deleteTransaction: (address: string) => void;
@@ -24,6 +25,7 @@ const AccountRow: React.FC<AccountRow> = ({
   status,
   hashedInfo,
   enrolled,
+  idType,
   isAdmin,
   deleteTransaction,
   openRemoveModal
@@ -35,16 +37,16 @@ const AccountRow: React.FC<AccountRow> = ({
     <TableCell>
       <TextWithTooltip status={status} text={hashedInfo} isAdmin={isAdmin} />
     </TableCell>
-    {/*     <TableCell>
-      <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />
-    </TableCell> */}
+    <TableCell>
+      <TextWithTooltip status={status} text={idType} isAdmin={isAdmin} />
+    </TableCell>
 
     <TableCell>
       <Grid container justifyContent="space-between" alignItems="center">
         {enrolled === true ? (
           <Chip color="primary" className={styles.pill} label="Enrolled" />
         ) : status === 'active' ? (
-          <Chip color="default" className={styles.pill} label="Not Enrolled" />
+          <Chip color="default" style={{ backgroundColor: 'default' }} className={styles.pill} label="Not Enrolled" />
         ) : status === PENDING_ADDITION ? (
           <Chip color="secondary" className={styles.pill} label="Pending Addition" />
         ) : status === PENDING_REMOVAL ? (

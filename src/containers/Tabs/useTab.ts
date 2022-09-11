@@ -13,6 +13,7 @@ type IdentAndStatus = {
   identifier: string;
   hashedInfo?: string;
   enrolled?: boolean;
+  idType?: string;
   status: string;
 };
 
@@ -60,7 +61,7 @@ export default <T>(originalList: (T & IdentAndStatus)[], identifierToParams: (id
 
     const updatedList = [...pending, ...derivedList];
 
-    if (!areArrayEqual(updatedList, list, ['identifier', 'status', 'hashedInfo', 'enrolled'])) {
+    if (!areArrayEqual(updatedList, list, ['identifier', 'status', 'hashedInfo', 'enrolled', 'idType'])) {
       setList(updatedList);
     }
     if (!areMapEqual(updatedTransactions, transactions)) {

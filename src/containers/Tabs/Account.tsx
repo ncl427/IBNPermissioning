@@ -34,6 +34,7 @@ type Account = {
   identifier: string;
   hashedInfo?: string;
   enrolled?: boolean;
+  idType?: string;
   status: string;
 };
 

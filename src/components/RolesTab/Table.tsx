@@ -29,7 +29,7 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
         <TableHead>
           <TableRow>
             <TableCell className={styles.headerCell}>Role Name</TableCell>
-            <TableCell className={styles.headerCell}>Role Atrributes</TableCell>
+            <TableCell className={styles.headerCell}>Role Types</TableCell>
             {/*   <TableCell className={styles.headerCell}>Enrolled</TableCell>
             <TableCell className={styles.headerCell}>Status</TableCell> */}
           </TableRow>

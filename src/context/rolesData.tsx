@@ -54,7 +54,7 @@ const loadAccountData = (
               idobject.address = responses1[i];
               idobject.enrolled = identity.enrolled;
               idobject.hashedInfo = identity.hashedInfo;
-              console.log('ACCOUNT', idobject);
+              console.log('ROLES', idobject);
               return idobject;
             })
           );

@@ -3,7 +3,7 @@ import { AccountRules } from '../chain/@types/AccountRules';
 import { accountRulesFactory } from '../chain/contracts/AccountRules';
 import { useNetwork } from './network';
 
-type Account = { address: string; hashedInfo: string; enrolled: boolean };
+type Account = { address: string; hashedInfo: string; enrolled: boolean; idType: string };
 //type Identity = { hashedInfo: string, enrolled: boolean };
 
 type ContextType =
@@ -50,10 +50,11 @@ const loadAccountData = (
           //console.log("HASHEDInfo: ", listIdentities );
           setAccountList(
             responses2.map((identity, i) => {
-              const idobject: Account = { address: '', hashedInfo: '', enrolled: false };
+              const idobject: Account = { address: '', hashedInfo: '', enrolled: false, idType: '' };
               idobject.address = responses1[i];
               idobject.enrolled = identity.enrolled;
               idobject.hashedInfo = identity.hashedInfo;
+              idobject.idType = identity.idType;
               console.log('ACCOUNT', idobject);
               return idobject;
             })
@@ -63,36 +64,6 @@ const loadAccountData = (
     });
   }
 };
-
-//  const loadExtraData = (
-//    accountRulesContract: AccountRules | undefined,
-//    setHashList: (account: Identity[]) => void) => {
-//    if (accountRulesContract === undefined) {
-//      setHashList([]);
-//    } else {
-//      accountRulesContract.functions.getSize().then(listSize => {
-//        const listElementsPromises : Promise<string>[] = [];
-//        let listHashPromises : Promise<any>[] = [];
-//        for (let i = 0; listSize.gt(i); i++) {
-//          listElementsPromises.push(accountRulesContract.functions.getByIndex(i));
-//        }
-//        Promise.all(listElementsPromises).then(responses => {
-//          console.log("Info: ", listElementsPromises );
-//          listHashPromises = responses.map(address =>  accountRulesContract.functions.getFullByAddress(address) );
-//          Promise.all(listHashPromises).then(responses => {
-//           console.log("HASHEDInfo: ", listHashPromises );
-//           setHashList(responses.map(identity => {
-//              const idobject: Identity = {hashedInfo: '', enrolled: false};
-//              idobject.enrolled = identity.enrolled;
-//              idobject.hashedInfo = identity.hashedInfo;
-//             return idobject;
-//           } ));
-//         });
-//        });
-
-//      });
-//    }
-//  };
 
 /**
  * Provider for the data context that contains the account list
