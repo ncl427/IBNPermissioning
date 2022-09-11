@@ -14,10 +14,9 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-//import "./AccountRulesProxy.sol";
 import "./PolicyRulesList.sol";
-//import "./AccountIngress.sol";
-//import "./Admin.sol";
+import "./PolicyIngress.sol";
+import "./Admin.sol";
 import "./PolicyStorage.sol";
 
 
@@ -29,7 +28,7 @@ contract PolicyRules is PolicyRulesList {
     // version of this contract: semver like 1.2.14 represented like 001002014
     uint private version = 3000000;
 
-    AccountIngress private ingressContract;
+    PolicyIngress private ingressContract;
 
     modifier onlyOnEditMode() {
         require(!readOnlyMode, "In read only mode: rules cannot be modified");
@@ -41,7 +40,7 @@ contract PolicyRules is PolicyRulesList {
         _;
     }
 
-    constructor (AccountIngress _ingressContract, AccountStorage _storage) public {
+    constructor (PolicyIngress _ingressContract, PolicyStorage _storage) public {
         setStorage(_storage);
         ingressContract = _ingressContract;
     }
@@ -68,7 +67,7 @@ contract PolicyRules is PolicyRulesList {
         return true;
     }
 
-    function transactionAllowed(
+/*     function transactionAllowed(
         address sender,
         address, // target
         uint256, // value
@@ -83,7 +82,7 @@ contract PolicyRules is PolicyRulesList {
             return true;
         }
         return false;
-    }
+    } */
 
     function accountPermitted(
         address _account

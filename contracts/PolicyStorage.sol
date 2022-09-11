@@ -15,10 +15,10 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Admin.sol";
-import "./AccountIngress.sol";
+import "./PolicyIngress.sol";
 
 
-contract AccountStorage {
+contract PolicyStorage {
     event VersionChange(
         address oldAddress,
         address newAddress
@@ -27,7 +27,7 @@ contract AccountStorage {
     address private latestVersion = msg.sender;
     address private owner = msg.sender;
 
-    AccountIngress private ingressContract;
+    PolicyIngress private ingressContract;
 
 
      //** Added Struct for keeping extra information of the accounts */ 
@@ -41,7 +41,7 @@ contract AccountStorage {
     mapping (address => identity) public permInfo; //Holds the information of the permissioned address
     mapping (address => uint256) private indexOf; //1 based indexing. 0 means non-existent
 
-    constructor (AccountIngress _ingressContract) public {
+    constructor (PolicyIngress _ingressContract) public {
         ingressContract = _ingressContract;
         add(msg.sender);
     }
@@ -157,7 +157,7 @@ contract AccountStorage {
         return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType);
     }
 
-    function getAccounts() public view returns (address[] memory){
+    function getPolicies() public view returns (address[] memory){
         return allowlist;
     }
 }

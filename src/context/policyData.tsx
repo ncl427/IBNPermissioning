@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { AccountRules } from '../chain/@types/AccountRules';
-import { accountRulesFactory } from '../chain/contracts/AccountRules';
+import { PolicyRules } from '../chain/@types/PolicyRules';
+import { policyRulesFactory } from '../chain/contracts/PolicyRules';
 import { useNetwork } from './network';
 
 type Account = { address: string; hashedInfo: string; enrolled: boolean };
@@ -14,8 +14,8 @@ type ContextType =
       //setHashList: React.Dispatch<React.SetStateAction<Identity[]>>;
       accountReadOnly?: boolean;
       setAccountReadOnly: React.Dispatch<React.SetStateAction<boolean | undefined>>;
-      accountRulesContract?: AccountRules;
-      setAccountRulesContract: React.Dispatch<React.SetStateAction<AccountRules | undefined>>;
+      accountRulesContract?: PolicyRules;
+      setAccountRulesContract: React.Dispatch<React.SetStateAction<PolicyRules | undefined>>;
     }
   | undefined;
 
@@ -24,7 +24,7 @@ const AccountDataContext = createContext<ContextType>(undefined);
 // //LOADS the HAshed policy and enrolled status from the Blockchain
 
 const loadAccountData = (
-  accountRulesContract: AccountRules | undefined,
+  accountRulesContract: PolicyRules | undefined,
   setAccountList: (account: Account[]) => void,
   setAccountReadOnly: (readOnly?: boolean) => void
 ) => {
@@ -65,7 +65,7 @@ const loadAccountData = (
 };
 
 //  const loadExtraData = (
-//    accountRulesContract: AccountRules | undefined,
+//    accountRulesContract: PolicyRules | undefined,
 //    setHashList: (account: Identity[]) => void) => {
 //    if (accountRulesContract === undefined) {
 //      setHashList([]);
@@ -105,7 +105,7 @@ export const PolicyDataProvider: React.FC<{}> = props => {
   const [accountList, setAccountList] = useState<Account[]>([]);
   //const [hashList, setHashList] = useState<Identity[]>([]);
   const [accountReadOnly, setAccountReadOnly] = useState<boolean | undefined>(undefined);
-  const [accountRulesContract, setAccountRulesContract] = useState<AccountRules | undefined>(undefined);
+  const [accountRulesContract, setAccountRulesContract] = useState<PolicyRules | undefined>(undefined);
 
   const value = useMemo(
     () => ({
@@ -125,7 +125,7 @@ export const PolicyDataProvider: React.FC<{}> = props => {
     if (accountIngressContract === undefined) {
       setAccountRulesContract(undefined);
     } else {
-      accountRulesFactory(accountIngressContract).then(contract => {
+      policyRulesFactory(accountIngressContract).then(contract => {
         setAccountRulesContract(contract);
         contract.removeAllListeners('AccountAdded');
         contract.removeAllListeners('AccountRemoved');

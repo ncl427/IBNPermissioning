@@ -14,10 +14,10 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./AccountStorage.sol";
+import "./PolicyStorage.sol";
 
 
-contract AccountRulesList {
+contract PolicyRulesList {
 
     //** Added Struct for keeping extra information of the accounts */ 
     struct identity {
@@ -41,26 +41,26 @@ contract AccountRulesList {
         address accountAddress
     );
 
-    AccountStorage private accountStorage;
+    PolicyStorage private policyStorage;
 
-    function setStorage(AccountStorage _storage) internal {
-        accountStorage = _storage;
+    function setStorage(PolicyStorage _storage) internal {
+        policyStorage = _storage;
     }
 
     function upgradeVersion(address _newVersion) internal {
-        accountStorage.upgradeVersion(_newVersion);
+        policyStorage.upgradeVersion(_newVersion);
     }
 
     function size() internal view returns (uint256) {
-        return accountStorage.size();
+        return policyStorage.size();
     }
 
     function exists(address _account) internal view returns (bool) {
-        return accountStorage.exists(_account);
+        return policyStorage.exists(_account);
     }
 
     function add(address _account) internal returns (bool) {
-        return accountStorage.add(_account);
+        return policyStorage.add(_account);
     }
 
     function addAll(address[] memory accounts) internal returns (bool) {
@@ -76,25 +76,25 @@ contract AccountRulesList {
 
     //** ADDED this function for modifying permissioned account information */
     function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType )  internal returns (bool) {
-        return accountStorage.updateIdentityInfo(_account, hashedInfo, enrolled, idType);
+        return policyStorage.updateIdentityInfo(_account, hashedInfo, enrolled, idType);
     }
 
     function remove(address _account) internal returns (bool) {
-        return accountStorage.remove(_account);
+        return policyStorage.remove(_account);
     }
 
     function getByIndex(uint index) public view returns (address account) {
-        return accountStorage.getByIndex(index);
+        return policyStorage.getByIndex(index);
     }
 
 
     //** ADDED this function for getting the information associated to an address */
     function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
-        return accountStorage.getFullByAddress(account);
+        return policyStorage.getFullByAddress(account);
     }
 
 
-    function getAccounts() public view returns (address[] memory){
-        return accountStorage.getAccounts();
+    function getPolicies() public view returns (address[] memory){
+        return policyStorage.getPolicies();
     }
 }
