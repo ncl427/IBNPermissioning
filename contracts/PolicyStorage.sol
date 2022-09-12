@@ -14,150 +14,349 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./Admin.sol";
-import "./PolicyIngress.sol";
-
+import './Admin.sol';
+import './PolicyIngress.sol';
 
 contract PolicyStorage {
-    event VersionChange(
-        address oldAddress,
-        address newAddress
+  event VersionChange(address oldAddress, address newAddress);
+  // initialize this to the deployer of this contract
+  address private latestVersion = msg.sender;
+  address private owner = msg.sender;
+
+  uint256 public rolesCount;
+  uint256 public servicesCount;
+  uint256 public policyCount;
+
+  PolicyIngress private ingressContract;
+
+  //** Added Struct for keeping extra information of the Policy information (Roles, Services) */
+  struct Roles {
+    uint256 roleId;
+    string roleName;
+    string roleType;
+    string[] roleAttributes;
+  }
+
+  struct Services {
+    uint256 serviceId;
+    string serviceName;
+    string description;
+    string[] serviceConfig;
+  }
+
+  struct Policies {
+    uint256 policyId;
+    uint256[] policyRoles;
+    uint256 policyService;
+    address policyProvider;
+    string hashedInfo;
+  }
+
+  // May use in another version
+  enum roleTypes {
+    Admin,
+    Subscriber,
+    OneTime
+  }
+
+  uint256[] public policylist;
+  uint256[] public rolelist;
+  uint256[] public servicelist;
+
+  mapping(uint256 => uint256) private indexOfPolicy; //1 based indexing. 0 means non-existent
+  mapping(uint256 => uint256) private indexOfRoles; //1 based indexing. 0 means non-existent
+  mapping(uint256 => uint256) private indexOfServices; //1 based indexing. 0 means non-existent
+
+  //Mapping for Service Providers
+  mapping(address => uint256) public providedService;
+  //The official record of all roles ever created
+  mapping(uint256 => Roles) public roles;
+  //The official record of all services ever created
+  mapping(uint256 => Services) public services;
+  //The official record of all policies ever created
+  mapping(uint256 => Policies) public policies;
+
+  constructor(PolicyIngress _ingressContract) {
+    ingressContract = _ingressContract;
+  }
+
+  modifier onlyLatestVersion() {
+    require(msg.sender == latestVersion, 'only the latestVersion can modify the list');
+    _;
+  }
+
+  modifier onlyAdmin() {
+    if (address(0) == address(ingressContract)) {
+      require(msg.sender == owner, 'only owner permitted since ingressContract is explicitly set to zero');
+    } else {
+      address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
+
+      require(adminContractAddress != address(0), 'Ingress contract must have Admin contract registered');
+      require(Admin(adminContractAddress).isAuthorized(msg.sender), 'Sender not authorized');
+    }
+    _;
+  }
+
+  function upgradeVersion(address _newVersion) public onlyAdmin {
+    emit VersionChange(latestVersion, _newVersion);
+    latestVersion = _newVersion;
+  }
+
+  function policiesSize() public view returns (uint256) {
+    return policylist.length;
+  }
+
+  function rolesSize() public view returns (uint256) {
+    return rolelist.length;
+  }
+
+  function servicesSize() public view returns (uint256) {
+    return servicelist.length;
+  }
+
+  function policyExists(uint256 _policyId) public view returns (bool) {
+    return indexOfPolicy[_policyId] != 0;
+  }
+
+  function roleExists(uint256 _roleId) public view returns (bool) {
+    return indexOfRoles[_roleId] != 0;
+  }
+
+  function serviceExists(uint256 _serviceId) public view returns (bool) {
+    return indexOfServices[_serviceId] != 0;
+  }
+
+  //** Add Roles */
+  function addRole(
+    string memory roleName,
+    string memory roleType,
+    string[] memory roleAttributes
+  ) public onlyLatestVersion returns (uint256) {
+    rolesCount++; //Find a better way for unique Ids
+    Roles memory newRole = Roles({
+      roleId: rolesCount,
+      roleName: roleName,
+      roleType: roleType,
+      roleAttributes: roleAttributes
+    });
+
+    rolelist.push(rolesCount);
+    indexOfRoles[rolesCount] = rolelist.length;
+    roles[rolesCount] = newRole;
+    return newRole.roleId;
+  }
+
+  //** Add Services */
+  function addService(
+    string memory serviceName,
+    string memory desc,
+    string[] memory serviceConfig
+  ) public onlyLatestVersion returns (uint256) {
+    servicesCount++; //Find a better way for unique Ids
+    Services memory newService = Services({
+      serviceId: servicesCount,
+      serviceName: serviceName,
+      description: desc,
+      serviceConfig: serviceConfig
+    });
+
+    servicelist.push(servicesCount);
+    indexOfServices[servicesCount] = servicelist.length;
+    services[servicesCount] = newService;
+    return newService.serviceId;
+  }
+
+  //** Add Policies */
+  function addPolicy(
+    uint256[] memory policyRoles,
+    uint256 policyService,
+    address policyProvider,
+    string memory hashedInfo
+  ) public onlyLatestVersion returns (uint256) {
+    policyCount++; //Find a better way for unique Ids
+    Policies memory newPolicy = Policies({
+      policyId: policyCount,
+      policyRoles: policyRoles,
+      policyService: policyService,
+      policyProvider: policyProvider,
+      hashedInfo: hashedInfo
+    });
+
+    policylist.push(policyCount);
+    indexOfPolicy[policyCount] = policylist.length;
+    policies[policyCount] = newPolicy;
+    return newPolicy.policyId;
+  }
+
+  //** Remove Roles */
+  function removeRole(uint256 roleId) public onlyLatestVersion returns (bool) {
+    uint256 index = indexOfRoles[roleId];
+    if (index > 0 && index <= rolelist.length) {
+      //1-based indexing
+      //move last address into index being vacated (unless we are dealing with last index)
+      if (index != rolelist.length) {
+        uint256 lastRole = rolelist[rolelist.length - 1];
+        rolelist[index - 1] = lastRole;
+        indexOfRoles[lastRole] = index;
+      }
+
+      //shrink array
+      rolelist.pop();
+      indexOfRoles[roleId] = 0;
+      delete roles[roleId];
+
+      return true;
+    }
+    return false;
+  }
+
+  //** Remove Services */
+  function removeService(uint256 serviceId) public onlyLatestVersion returns (bool) {
+    uint256 index = indexOfServices[serviceId];
+    if (index > 0 && index <= servicelist.length) {
+      //1-based indexing
+      //move last address into index being vacated (unless we are dealing with last index)
+      if (index != servicelist.length) {
+        uint256 lastService = servicelist[servicelist.length - 1];
+        servicelist[index - 1] = lastService;
+        indexOfServices[lastService] = index;
+      }
+
+      //shrink array
+      servicelist.pop();
+      indexOfServices[serviceId] = 0;
+      delete services[serviceId];
+      return true;
+    }
+    return false;
+  }
+
+  //** Remove Policies */
+  function removePolicy(uint256 policyId) public onlyLatestVersion returns (bool) {
+    uint256 index = indexOfPolicy[policyId];
+    if (index > 0 && index <= policylist.length) {
+      //1-based indexing
+      //move last address into index being vacated (unless we are dealing with last index)
+      if (index != policylist.length) {
+        uint256 lastPolicy = policylist[policylist.length - 1];
+        policylist[index - 1] = lastPolicy;
+        indexOfPolicy[lastPolicy] = index;
+      }
+
+      //shrink array
+      policylist.pop();
+      indexOfPolicy[policyId] = 0;
+      delete policies[policyId];
+      return true;
+    }
+    return false;
+  }
+
+  /*   //ADDED this function for modifying permissioned account information 
+  function updateIdentityInfo(
+    address _account,
+    string memory hashedInfo,
+    bool enrolled,
+    string memory idType
+  ) public onlyLatestVersion returns (bool) {
+    string memory empty = '';
+    uint256 index = indexOf[_account];
+    if (index > 0) {
+      if (keccak256(bytes(hashedInfo)) == keccak256(bytes(empty))) {
+        updateIdentityEnroll(_account, enrolled);
+        return true;
+      } else {
+        updateIdentity(_account, hashedInfo, idType);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //Update function helper
+  function updateIdentityEnroll(address _account, bool enrolled) private {
+    identity storage updateId = permInfo[_account];
+    updateId.enrolled = enrolled;
+  }
+
+  //Update function helper
+  function updateIdentity(
+    address _account,
+    string memory hashedInfo,
+    string memory idType
+  ) private {
+    identity storage updateId = permInfo[_account];
+    updateId.hashedInfo = hashedInfo;
+    updateId.enrolled = true;
+    updateId.idType = idType;
+  }
+ */
+  function getRoleByIndex(uint256 index) public view returns (uint256 roleId) {
+    return rolelist[index];
+  }
+
+  function getPolicyByIndex(uint256 index) public view returns (uint256 policyId) {
+    return policylist[index];
+  }
+
+  function getServiceByIndex(uint256 index) public view returns (uint256 serviceId) {
+    return servicelist[index];
+  }
+
+  //** Full policy Information */
+  function getFullPolicyById(uint256 policyId)
+    public
+    view
+    returns (
+      uint256[] memory policyRoles,
+      uint256 policyService,
+      address policyProvider,
+      string memory hashedInfo
+    )
+  {
+    return (
+      policies[policyId].policyRoles,
+      policies[policyId].policyService,
+      policies[policyId].policyProvider,
+      policies[policyId].hashedInfo
     );
-    // initialize this to the deployer of this contract
-    address private latestVersion = msg.sender;
-    address private owner = msg.sender;
+  }
 
-    PolicyIngress private ingressContract;
+  //** Full Role Information */
+  function getFullRoleById(uint256 roleId)
+    public
+    view
+    returns (
+      string memory roleName,
+      string memory roleType,
+      string[] memory roleAttributes
+    )
+  {
+    return (roles[roleId].roleName, roles[roleId].roleType, roles[roleId].roleAttributes);
+  }
 
+  //** Full Service Information */
+  function getFullServiceById(uint256 serviceId)
+    public
+    view
+    returns (
+      string memory serviceName,
+      string memory description,
+      string[] memory serviceConfig
+    )
+  {
+    return (services[serviceId].serviceName, services[serviceId].description, services[serviceId].serviceConfig);
+  }
 
-     //** Added Struct for keeping extra information of the accounts */ 
-    struct identity {
-        string hashedInfo;
-        bool enrolled;
-        string idType;
-    }
+  function getPolicies() public view returns (uint256[] memory) {
+    return policylist;
+  }
 
-    address[] public allowlist;
-    mapping (address => identity) public permInfo; //Holds the information of the permissioned address
-    mapping (address => uint256) private indexOf; //1 based indexing. 0 means non-existent
+  function getRoles() public view returns (uint256[] memory) {
+    return servicelist;
+  }
 
-    constructor (PolicyIngress _ingressContract) public {
-        ingressContract = _ingressContract;
-        add(msg.sender);
-    }
-
-    modifier onlyLatestVersion() {
-        require(msg.sender == latestVersion, "only the latestVersion can modify the list");
-        _;
-    }
-
-    modifier onlyAdmin() {
-        if (address(0) == address(ingressContract)) {
-            require(msg.sender == owner, "only owner permitted since ingressContract is explicitly set to zero");
-        } else {
-            address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
-
-            require(adminContractAddress != address(0), "Ingress contract must have Admin contract registered");
-            require(Admin(adminContractAddress).isAuthorized(msg.sender), "Sender not authorized");
-        }
-        _;
-    }
-
-    function upgradeVersion(address _newVersion) public onlyAdmin {
-        emit VersionChange(latestVersion, _newVersion);
-        latestVersion = _newVersion;
-    }
-
-    function size() public view returns (uint256) {
-        return allowlist.length;
-    }
-
-    function exists(address _account) public view returns (bool) {
-        return indexOf[_account] != 0;
-    }
-
-    //** MODIFIED this function for adding extra account info */
-    function add(address _account) public onlyLatestVersion returns (bool) {
-        if (indexOf[_account] == 0) {
-
-            identity memory newIdentity = identity({
-            hashedInfo: 'None',
-            enrolled: false,
-            idType: 'undefined'
-            });
-
-            allowlist.push(_account);
-            indexOf[_account] = allowlist.length;
-            permInfo[_account] = newIdentity;
-            return true;
-        }
-        return false;
-    }
-
-    //** MODIFIED this function for deleting extra account info */
-    function remove(address _account) public onlyLatestVersion returns (bool) {
-        uint256 index = indexOf[_account];
-        if (index > 0 && index <= allowlist.length) { //1-based indexing
-            //move last address into index being vacated (unless we are dealing with last index)
-            if (index != allowlist.length) {
-                address lastAccount = allowlist[allowlist.length - 1];
-                allowlist[index - 1] = lastAccount;
-                indexOf[lastAccount] = index;
-            }
-
-            //shrink array
-            allowlist.pop();
-            indexOf[_account] = 0;
-            delete permInfo[_account];
-            return true;
-        }
-        return false;
-    }
-    //** ADDED this function for modifying permissioned account information */
-    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType ) public onlyLatestVersion returns (bool) {
-        string memory empty = "";
-        uint256 index = indexOf[_account];
-        if (index > 0) {
-            if (keccak256(bytes(hashedInfo)) == keccak256(bytes(empty))) {
-                updateIdentityEnroll(_account, enrolled);
-                return true;
-            } 
-             else
-            {
-                updateIdentity(_account, hashedInfo, idType);
-                return true;
-            }
-
-        }
-        return false;
-
-    }
-    //**Update function helper */
-    function updateIdentityEnroll(address _account, bool enrolled ) private  {
-        identity storage updateId = permInfo[_account];
-        updateId.enrolled = enrolled;
-    }
-    //**Update function helper */
-    function updateIdentity(address _account, string memory hashedInfo, string memory idType ) private {
-        identity storage updateId = permInfo[_account];
-        updateId.hashedInfo = hashedInfo;
-        updateId.enrolled = true;
-        updateId.idType = idType;
-    }
-
-    
-
-
-    function getByIndex(uint index) public view returns (address account) {
-        return allowlist[index];
-    }
-
-    //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
-        return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType);
-    }
-
-    function getPolicies() public view returns (address[] memory){
-        return allowlist;
-    }
+  function getServices() public view returns (uint256[] memory) {
+    return rolelist;
+  }
 }

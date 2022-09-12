@@ -8,6 +8,7 @@ const PolicyStorage = artifacts.require("./PolicyStorage.sol");
 
 const adminContractName = Web3Utils.utf8ToHex("administration");
 const rulesContractName = Web3Utils.utf8ToHex("rules");
+//const policyContractName = Web3Utils.utf8ToHex("PolicyRules");
 
 /* The address of the account ingress contract if pre-deployed */
 let policyIngress = process.env.POLICY_INGRESS_CONTRACT_ADDRESS;
@@ -19,7 +20,7 @@ let policyStorage = process.env.POLICY_STORAGE_CONTRACT_ADDRESS;
 
 async function logCurrentAllowlist(instance) {
     let currentAllowlist = await instance.getPolicies();
-    console.log("\n<<< current POLICIES >>>", instance);
+    console.log("\n<<< current POLICIES >>>", currentAllowlist);
     console.log(currentAllowlist);
     console.log("\n<<< end of current POLICIES >>>");
 }
@@ -86,6 +87,9 @@ module.exports = async(deployer, network) => {
 
     await policyIngressInstance.setContractAddress(rulesContractName, Rules.address);
     console.log("   > Updated PolicyIngress contract with Rules address = " + Rules.address);
+    //console.log("POLICY RULES NAME", policyContractName)
+    console.log(" RULES ", rulesContractName, Rules.address)
+
 
     logCurrentAllowlist(policyRulesContract);
 }

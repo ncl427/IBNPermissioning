@@ -122,6 +122,13 @@ contract AccountRules is AccountRulesProxy, AccountRulesList {
         return updated;
     }
 
+        //** ADDED this function for adding roles  permissioned identities */
+    function addRoleAccount(address account, uint256[] memory roles ) external onlyAdmin onlyOnEditMode  returns (bool) {
+        bool updated = updateIdentityInfo(account, roles);
+        emit AccountUpdated(updated, account);
+        return updated;
+    }
+
     function isAuthorizedAdmin(address user) private view returns (bool) {
         address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
 

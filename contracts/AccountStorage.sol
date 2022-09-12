@@ -35,6 +35,7 @@ contract AccountStorage {
         string hashedInfo;
         bool enrolled;
         string idType;
+        uint[] roles;
     }
 
     address[] public allowlist;
@@ -83,9 +84,9 @@ contract AccountStorage {
             identity memory newIdentity = identity({
             hashedInfo: 'None',
             enrolled: false,
-            idType: 'undefined'
+            idType: 'undefined',
+            roles: new uint[](0)
             });
-
             allowlist.push(_account);
             indexOf[_account] = allowlist.length;
             permInfo[_account] = newIdentity;
@@ -145,6 +146,15 @@ contract AccountStorage {
         updateId.idType = idType;
     }
 
+    //**Add Role to Identity Function */
+    function addRoleToIdentity(address _account, uint256[] memory roles) public onlyLatestVersion returns (bool)  {
+        identity storage updateId = permInfo[_account];
+        updateId.roles = roles;
+
+        return true;
+    }
+
+
     
 
 
@@ -153,8 +163,8 @@ contract AccountStorage {
     }
 
     //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
-        return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType);
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType, uint256[] memory roles  ) {
+        return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType, permInfo[account].roles);
     }
 
     function getAccounts() public view returns (address[] memory){

@@ -14,117 +14,151 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./PolicyRulesList.sol";
-import "./PolicyIngress.sol";
-import "./Admin.sol";
-import "./PolicyStorage.sol";
-
+import './PolicyRulesList.sol';
+import './PolicyIngress.sol';
+import './Admin.sol';
+import './PolicyStorage.sol';
 
 contract PolicyRules is PolicyRulesList {
+  // in read-only mode rules can't be added/removed
+  // this will be used to protect data when upgrading contracts
+  bool private readOnlyMode = false;
+  // version of this contract: semver like 1.2.14 represented like 001002014
+  uint256 private version = 3000000;
 
-    // in read-only mode rules can't be added/removed
-    // this will be used to protect data when upgrading contracts
-    bool private readOnlyMode = false;
-    // version of this contract: semver like 1.2.14 represented like 001002014
-    uint private version = 3000000;
+  PolicyIngress private ingressContract;
+  PolicyStorage private policyStorage;
 
-    PolicyIngress private ingressContract;
+  event PolicyAdded(bool policyAdded, uint256 policyId);
 
-    modifier onlyOnEditMode() {
-        require(!readOnlyMode, "In read only mode: rules cannot be modified");
-        _;
-    }
+  event PolicyUpdated(bool policyUpdated, uint256 policyId);
 
-    modifier onlyAdmin() {
-        require(isAuthorizedAdmin(msg.sender), "Sender not authorized");
-        _;
-    }
+  event PolicyRemoved(bool policyRemoved, uint256 policyId);
 
-    constructor (PolicyIngress _ingressContract, PolicyStorage _storage) public {
-        setStorage(_storage);
-        ingressContract = _ingressContract;
-    }
+  event RoleAdded(bool roleAdded, uint256 roleId);
 
-    // VERSION
-    function getContractVersion() external view returns (uint) {
-        return version;
-    }
+  event RoleUpdated(bool roleUpdated, uint256 roleId);
 
-    // READ ONLY MODE
-    function isReadOnly() external view returns (bool) {
-        return readOnlyMode;
-    }
+  event RoleRemoved(bool roleRemoved, uint256 roleId);
 
-    function enterReadOnly() external onlyAdmin returns (bool) {
-        require(readOnlyMode == false, "Already in read only mode");
-        readOnlyMode = true;
-        return true;
-    }
+  event ServiceAdded(bool serviceAdded, uint256 serviceId);
 
-    function exitReadOnly() external onlyAdmin returns (bool) {
-        require(readOnlyMode == true, "Not in read only mode");
-        readOnlyMode = false;
-        return true;
-    }
+  event ServiceUpdated(bool serviceUpdated, uint256 serviceId);
 
-/*     function transactionAllowed(
-        address sender,
-        address, // target
-        uint256, // value
-        uint256, // gasPrice
-        uint256, // gasLimit
-        bytes calldata // payload
-    ) external override view returns (bool) {
-        if (accountPermitted(sender)) {
-            return true;
-        }
-        if (isAuthorizedAdmin(sender)) {
-            return true;
-        }
-        return false;
-    } */
+  event ServiceRemoved(bool serviceRemoved, uint256 serviceId);
 
-    function accountPermitted(
-        address _account
-    ) public view returns (bool) {
-        return exists(_account);
-    }
+  modifier onlyOnEditMode() {
+    require(!readOnlyMode, 'In read only mode: rules cannot be modified');
+    _;
+  }
 
-    function addAccount(
-        address account
-    ) external onlyAdmin onlyOnEditMode returns (bool) {
-        bool added = add(account);
-        emit AccountAdded(added, account);
-        return added;
-    }
+  modifier onlyAdmin() {
+    require(isAuthorizedAdmin(msg.sender), 'Sender not authorized');
+    _;
+  }
 
-    function removeAccount(
-        address account
-    ) external onlyAdmin onlyOnEditMode returns (bool) {
-        bool removed = remove(account);
-        emit AccountRemoved(removed, account);
-        return removed;
-    }
+  constructor(PolicyIngress _ingressContract, PolicyStorage _storage) {
+    setStorage(_storage);
+    policyStorage = _storage;
+    ingressContract = _ingressContract;
+  }
 
-    function getSize() external view returns (uint) {
-        return size();
-    }
+  // VERSION
+  function getContractVersion() external view returns (uint256) {
+    return version;
+  }
 
-    function addAccounts(address[] calldata accounts) external onlyAdmin returns (bool) {
-        return addAll(accounts);
-    }
+  // READ ONLY MODE
+  function isReadOnly() external view returns (bool) {
+    return readOnlyMode;
+  }
 
-    //** ADDED this function for modifying permissioned account information */
-    function updateAccount(address account, string memory hashedInfo, bool enrolled, string memory idType  ) external onlyAdmin onlyOnEditMode  returns (bool) {
-        bool updated = updateIdentityInfo(account, hashedInfo, enrolled, idType);
-        emit AccountUpdated(updated, account);
-        return updated;
-    }
+  function enterReadOnly() external onlyAdmin returns (bool) {
+    require(readOnlyMode == false, 'Already in read only mode');
+    readOnlyMode = true;
+    return true;
+  }
 
-    function isAuthorizedAdmin(address user) private view returns (bool) {
-        address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
+  function exitReadOnly() external onlyAdmin returns (bool) {
+    require(readOnlyMode == true, 'Not in read only mode');
+    readOnlyMode = false;
+    return true;
+  }
 
-        require(adminContractAddress != address(0), "Ingress contract must have Admin contract registered");
-        return Admin(adminContractAddress).isAuthorized(user);
-    }
+  function addRole(
+    string memory roleName,
+    string memory roleType,
+    string[] memory roleAttributes
+  ) external onlyAdmin onlyOnEditMode returns (bool) {
+    uint256 roleId = policyStorage.addRole(roleName, roleType, roleAttributes);
+    emit RoleAdded(true, roleId);
+    return true;
+  }
+
+  function addPolicy(
+    uint256[] memory policyRoles,
+    uint256 policyService,
+    address policyProvider,
+    string memory hashedInfo
+  ) external onlyAdmin onlyOnEditMode returns (bool) {
+    uint256 policyId = policyStorage.addPolicy(policyRoles, policyService, policyProvider, hashedInfo);
+    emit RoleAdded(true, policyId);
+    return true;
+  }
+
+  function addService(
+    string memory serviceName,
+    string memory desc,
+    string[] memory serviceConfig
+  ) external onlyAdmin onlyOnEditMode returns (bool) {
+    uint256 serviceId = policyStorage.addService(serviceName, desc, serviceConfig);
+    emit RoleAdded(true, serviceId);
+    return true;
+  }
+
+  function removePolicy(uint256 policyId) external onlyAdmin onlyOnEditMode returns (bool) {
+    bool removed = policyStorage.removePolicy(policyId);
+    emit RoleRemoved(removed, policyId);
+  }
+
+  function removeRole(uint256 roleId) external onlyAdmin onlyOnEditMode returns (bool) {
+    bool removed = policyStorage.removeRole(roleId);
+    emit RoleRemoved(removed, roleId);
+  }
+
+  function removeService(uint256 serviceId) external onlyAdmin onlyOnEditMode returns (bool) {
+    bool removed = policyStorage.removeService(serviceId);
+    emit RoleRemoved(removed, serviceId);
+  }
+
+  function policiesSize() external view returns (uint256) {
+    return policyStorage.policiesSize();
+  }
+
+  function rolesSize() external view returns (uint256) {
+    return policyStorage.rolesSize();
+  }
+
+  function servicesSize() external view returns (uint256) {
+    return policyStorage.servicesSize();
+  }
+
+  //** ADDED this function for modifying permissioned account information */
+  /*   function updateAccount(
+    address account,
+    string memory hashedInfo,
+    bool enrolled,
+    string memory idType
+  ) external onlyAdmin onlyOnEditMode returns (bool) {
+    bool updated = updateIdentityInfo(account, hashedInfo, enrolled, idType);
+    emit AccountUpdated(updated, account);
+    return updated;
+  } */
+
+  function isAuthorizedAdmin(address user) private view returns (bool) {
+    address adminContractAddress = ingressContract.getContractAddress(ingressContract.ADMIN_CONTRACT());
+
+    require(adminContractAddress != address(0), 'Ingress contract must have Admin contract registered');
+    return Admin(adminContractAddress).isAuthorized(user);
+  }
 }

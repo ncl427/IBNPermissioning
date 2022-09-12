@@ -14,87 +14,120 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./PolicyStorage.sol";
-
+import './PolicyStorage.sol';
 
 contract PolicyRulesList {
+  //** Added Struct for keeping extra information of the Policy information (Roles, Services) */
+  struct Roles {
+    uint256 roleId;
+    string roleName;
+    string roleType;
+    string[] roleAttributes;
+  }
 
-    //** Added Struct for keeping extra information of the accounts */ 
-    struct identity {
-        string hashedInfo;
-        bool enrolled;
-        string idType;
-    }
-    
-    event AccountAdded(
-        bool accountAdded,
-        address accountAddress
-    );
+  struct Services {
+    uint256 serviceId;
+    string serviceName;
+    string description;
+    string[] serviceConfig;
+  }
 
-    event AccountUpdated(
-        bool accountUpdated,
-        address accountAddress
-    );
+  struct Policies {
+    uint256 policyId;
+    uint256[] policyRoles;
+    uint256 policyService;
+    address policyProvider;
+    string hashedInfo;
+  }
 
-    event AccountRemoved(
-        bool accountRemoved,
-        address accountAddress
-    );
 
-    PolicyStorage private policyStorage;
+  PolicyStorage private policyStorage;
 
-    function setStorage(PolicyStorage _storage) internal {
-        policyStorage = _storage;
-    }
+  function setStorage(PolicyStorage _storage) internal {
+    policyStorage = _storage;
+  }
 
-    function upgradeVersion(address _newVersion) internal {
-        policyStorage.upgradeVersion(_newVersion);
-    }
+  function upgradeVersion(address _newVersion) internal {
+    policyStorage.upgradeVersion(_newVersion);
+  }
 
-    function size() internal view returns (uint256) {
-        return policyStorage.size();
-    }
+  function policyExists(uint256 _policyId) public view returns (bool) {
+    return policyStorage.policyExists(_policyId);
+  }
 
-    function exists(address _account) internal view returns (bool) {
-        return policyStorage.exists(_account);
-    }
+  function roleExists(uint256 _roleId) public view returns (bool) {
+    return policyStorage.roleExists(_roleId);
+  }
 
-    function add(address _account) internal returns (bool) {
-        return policyStorage.add(_account);
-    }
+  function serviceExists(uint256 _serviceId) public view returns (bool) {
+    return policyStorage.serviceExists(_serviceId);
+  }
 
-    function addAll(address[] memory accounts) internal returns (bool) {
-        bool allAdded = true;
-        for (uint i = 0; i < accounts.length; i++) {
-            bool added = add(accounts[i]);
-            emit AccountAdded(added, accounts[i]);
-            allAdded = allAdded && added;
-        }
 
-        return allAdded;
-    }
-
-    //** ADDED this function for modifying permissioned account information */
-    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType )  internal returns (bool) {
+  //** ADDED this function for modifying permissioned account information */
+  /*    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType )  internal returns (bool) {
         return policyStorage.updateIdentityInfo(_account, hashedInfo, enrolled, idType);
-    }
+    } */
 
-    function remove(address _account) internal returns (bool) {
-        return policyStorage.remove(_account);
-    }
+  function getRoleByIndex(uint256 index) public view returns (uint256 roleId) {
+    return policyStorage.getRoleByIndex(index);
+  }
 
-    function getByIndex(uint index) public view returns (address account) {
-        return policyStorage.getByIndex(index);
-    }
+  function getServiceByIndex(uint256 index) public view returns (uint256 serviceId) {
+    return policyStorage.getServiceByIndex(index);
+  }
 
+  function getPolicyByIndex(uint256 index) public view returns (uint256 policyId) {
+    return policyStorage.getPolicyByIndex(index);
+  }
 
-    //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
-        return policyStorage.getFullByAddress(account);
-    }
+  //** ADDED this function for getting the information associated to an address */
+  function getFullPolicyById(uint256 policyId)
+    public
+    view
+    returns (
+      uint256[] memory policyRoles,
+      uint256 policyService,
+      address policyProvider,
+      string memory hashedInfo
+    )
+  {
+    return policyStorage.getFullPolicyById(policyId);
+  }
 
+  function getFullRoleById(uint256 roleId)
+    public
+    view
+    returns (
+      string memory roleName,
+      string memory roleType,
+      string[] memory roleAttributes
+    )
+  {
+    return policyStorage.getFullRoleById(roleId);
+  }
 
-    function getPolicies() public view returns (address[] memory){
-        return policyStorage.getPolicies();
-    }
+  function getFullServiceById(uint256 serviceId)
+    public
+    view
+    returns (
+      string memory serviceName,
+      string memory description,
+      string[] memory serviceConfig
+    )
+  {
+    return policyStorage.getFullServiceById(serviceId);
+  }
+
+  function getPolicies() public view returns (uint256[] memory) {
+    return policyStorage.getPolicies();
+  }
+
+  function getRoles() public view returns (uint256[] memory) {
+    return policyStorage.getPolicies();
+  }
+
+  function getServices() public view returns (uint256[] memory) {
+    return policyStorage.getPolicies();
+  }
 }

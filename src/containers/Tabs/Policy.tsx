@@ -7,7 +7,7 @@ import idx from 'idx';
 import { useAccountData } from '../../context/policyData';
 import { useAdminData } from '../../context/adminData';
 // Utils
-import useTab from './useTab';
+import useTab from './useTabPolicy';
 import { errorToast } from '../../util/tabTools';
 import { deleteZitiIdentity } from '../../util/api';
 
@@ -25,15 +25,19 @@ import {
   FAIL
 } from '../../constants/transactions';
 
+import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+
 type PolicyTabContainerProps = {
   isOpen: boolean;
 };
 
 type Account = {
-  address: string;
+  policyId: BigNumber;
   identifier: string;
+  policyRoles?: BigNumber[];
+  policyService?: BigNumber;
+  policyProvider?: string;
   hashedInfo?: string;
-  enrolled?: boolean;
   status: string;
 };
 
@@ -43,14 +47,14 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
-    (identifier: string) => ({ address: identifier })
+    (identifier: string) => ({ policyId: new BigNumber(identifier) })
   );
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
   if (!!accountRulesContract) {
     const handleAdd = async (value: string) => {
       try {
-        const tx = await accountRulesContract!.functions.addAccount(value);
+        const tx = await accountRulesContract!.functions.addPolicy([1, 2], 1, value, '');
         toggleModal('add')(false);
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
@@ -79,8 +83,8 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
 
     const handleRemove = async (value: string) => {
       try {
-        const est = await accountRulesContract!.estimate.removeAccount(value);
-        const tx = await accountRulesContract!.functions.removeAccount(value, { gasLimit: est.toNumber() * 2 });
+        const est = await accountRulesContract!.estimate.removePolicy(value);
+        const tx = await accountRulesContract!.functions.removePolicy(value, { gasLimit: est.toNumber() * 2 });
         toggleModal('remove')(false);
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
@@ -106,7 +110,7 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
       }
 
       let isDuplicateAccount =
-        list.filter((item: Account) => address.toLowerCase() === item.address.toLowerCase()).length > 0;
+        list.filter((item: Account) => address.toLowerCase() === item.identifier.toLowerCase()).length > 0;
       if (isDuplicateAccount) {
         return {
           valid: false,

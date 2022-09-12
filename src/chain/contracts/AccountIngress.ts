@@ -8,6 +8,7 @@ let instance: AccountIngress | null = null;
 
 export const accountIngressFactory = async (config: Config, provider: Provider | Signer) => {
   if (instance) return instance;
+  console.log('ACCOUNT INGRESS INSTANCE', instance, config.policyIngressAddress);
 
   instance = new Contract(config.accountIngressAddress, AccountIngressAbi.abi, provider) as AccountIngress;
   return instance;

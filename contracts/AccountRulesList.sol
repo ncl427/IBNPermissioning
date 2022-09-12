@@ -24,6 +24,7 @@ contract AccountRulesList {
         string hashedInfo;
         bool enrolled;
         string idType;
+        uint[] roles;
     }
     
     event AccountAdded(
@@ -79,6 +80,11 @@ contract AccountRulesList {
         return accountStorage.updateIdentityInfo(_account, hashedInfo, enrolled, idType);
     }
 
+        //** ADDED this function for adding roles to permissioned identities */
+    function updateIdentityInfo(address _account, uint256[] memory roles )  internal returns (bool) {
+        return accountStorage.addRoleToIdentity(_account,  roles);
+    }
+
     function remove(address _account) internal returns (bool) {
         return accountStorage.remove(_account);
     }
@@ -89,7 +95,7 @@ contract AccountRulesList {
 
 
     //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType  ) {
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType, uint256[] memory roles   ) {
         return accountStorage.getFullByAddress(account);
     }
 

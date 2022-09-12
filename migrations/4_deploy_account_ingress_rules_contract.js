@@ -83,6 +83,7 @@ module.exports = async(deployer, network) => {
 
     await accountIngressInstance.setContractAddress(rulesContractName, Rules.address);
     console.log("   > Updated AccountIngress contract with Rules address = " + Rules.address);
+    console.log(" RULES ", rulesContractName)
 
     logCurrentAllowlist(accountRulesContract);
 }
