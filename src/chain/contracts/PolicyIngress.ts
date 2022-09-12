@@ -11,8 +11,8 @@ export const policyIngressFactory = async (config: Config, provider: Provider | 
     return instance;
   }
 
+  instance = new Contract(config.policyIngressAddress, PolicyIngressAbi.abi, provider) as PolicyIngress;
   console.log('POLICY INGRESS INSTANCE', instance, config.policyIngressAddress);
 
-  instance = new Contract(config.policyIngressAddress, PolicyIngressAbi.abi, provider) as PolicyIngress;
   return instance;
 };

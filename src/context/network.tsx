@@ -111,6 +111,8 @@ export const useNetwork = () => {
     }
   }, [networkId, config.networkId]);
 
+  //console.log("CONTRACTS", contracts)
+
   return {
     isCorrectNetwork,
     networkId,

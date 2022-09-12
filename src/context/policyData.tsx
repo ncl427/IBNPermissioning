@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { PolicyRules } from '../chain/@types/PolicyRules';
 import { policyRulesFactory } from '../chain/contracts/PolicyRules';
 import { useNetwork } from './network';
-import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+import { BigNumber } from 'ethers/utils';
 
 //import BigNumber from 'bignumber.js'
 
@@ -42,8 +42,6 @@ const loadAccountData = (
     setAccountReadOnly(undefined);
   } else {
     accountRulesContract.functions.isReadOnly().then(isReadOnly => setAccountReadOnly(isReadOnly));
-    console.log('PEEENIIICHI:', accountRulesContract);
-
     accountRulesContract.functions.policiesSize().then(listSize => {
       const listElementsPromises: Promise<BigNumber>[] = [];
       let listHashPromises: Promise<any>[] = [];
@@ -138,13 +136,13 @@ export const PolicyDataProvider: React.FC<{}> = props => {
     [accountList, setAccountList, accountReadOnly, setAccountReadOnly, accountRulesContract, setAccountRulesContract]
   );
 
-  const { accountIngressContract } = useNetwork();
+  const { policyIngressContract } = useNetwork();
 
   useEffect(() => {
-    if (accountIngressContract === undefined) {
+    if (policyIngressContract === undefined) {
       setAccountRulesContract(undefined);
     } else {
-      policyRulesFactory(accountIngressContract).then(contract => {
+      policyRulesFactory(policyIngressContract).then(contract => {
         setAccountRulesContract(contract);
         contract.removeAllListeners('PolicyAdded');
         contract.removeAllListeners('PolicyRemoved');
@@ -168,7 +166,7 @@ export const PolicyDataProvider: React.FC<{}> = props => {
         });
       });
     }
-  }, [accountIngressContract, setAccountList, setAccountReadOnly]);
+  }, [policyIngressContract, setAccountList, setAccountReadOnly]);
 
   return <AccountDataContext.Provider value={value} {...props} />;
 };

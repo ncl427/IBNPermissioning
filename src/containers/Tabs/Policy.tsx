@@ -25,7 +25,7 @@ import {
   FAIL
 } from '../../constants/transactions';
 
-import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+import { BigNumber } from 'ethers/utils';
 
 type PolicyTabContainerProps = {
   isOpen: boolean;

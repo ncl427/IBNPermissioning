@@ -8,7 +8,7 @@ import useTransaction from './useTransaction';
 import { arrayInclude, areArrayEqual, areMapEqual } from '../../util/array';
 // Constants
 import { PENDING_ADDITION, PENDING_REMOVAL, FAIL_ADDITION, FAIL_REMOVAL } from '../../constants/transactions';
-import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+import { BigNumber } from 'ethers/utils';
 
 type IdentAndStatus = {
   identifier: string;
