@@ -29,8 +29,16 @@ const loadConfig = async (): Promise<Config> => {
     // if env variables exists, then we will assume we are connecting to besu, otherwise we will assume ganache
     let accountIngressAddress = process.env.REACT_APP_ACCOUNT_INGRESS_CONTRACT_ADDRESS;
     let nodeIngressAddress = process.env.REACT_APP_NODE_INGRESS_CONTRACT_ADDRESS;
-    let policyIngressAddress = process.env.REAC_APP_POLICY_INGRESS_CONTRACT_ADDRESS;
+    let policyIngressAddress = process.env.REACT_APP_ACCOUNT_INGRESS_CONTRACT_ADDRESS;
     let networkId = process.env.REACT_APP_CHAIN_ID;
+
+    const policyIngressNetworks = Object.values(PolicyIngress.networks);
+    if (policyIngressNetworks.length === 0) {
+      throw new Error("Policy Ingress Contract abi doesn't contain any networks, probably not deployed");
+    }
+    policyIngressAddress = (policyIngressNetworks[0] as { address: string }).address;
+
+    console.log('Config Enviroment Addresses: ', accountIngressAddress, nodeIngressAddress, policyIngressAddress);
 
     if (accountIngressAddress) {
       console.log('Using environment variables for contract addresses and network id');
@@ -65,7 +73,7 @@ const loadConfig = async (): Promise<Config> => {
     }
     nodeIngressAddress = (nodeIngressNetworks[0] as { address: string }).address;
 
-    const policyIngressNetworks = Object.values(PolicyIngress.networks);
+    //const policyIngressNetworks = Object.values(PolicyIngress.networks);
     if (policyIngressNetworks.length === 0) {
       throw new Error("Policy Ingress Contract abi doesn't contain any networks, probably not deployed");
     }

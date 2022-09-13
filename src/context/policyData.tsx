@@ -51,7 +51,7 @@ const loadAccountData = (
       Promise.all(listElementsPromises).then(responses1 => {
         listHashPromises = responses1.map(policyId => accountRulesContract.functions.getFullPolicyById(policyId));
         //setAccountList(responses1.map(address => ({ address })));
-        console.log('HASHEDInfo: ', listHashPromises);
+        console.log('HASHEDInfoPol: ', listHashPromises);
 
         Promise.all(listHashPromises).then(responses2 => {
           // const zip = (a1: any[],a2: { [x: string]: any; }) => a1.map((x, i) => [x,a2[i]]);
