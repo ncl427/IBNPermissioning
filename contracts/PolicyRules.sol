@@ -115,6 +115,10 @@ contract PolicyRules is PolicyRulesList {
     address policyProvider,
     string memory hashedInfo
   ) external onlyAdmin onlyOnEditMode returns (bool) {
+    for (uint256 i = 0; i < policyRoles.length; i++) {
+      require(roleExists(policyRoles[i]), 'Role does not exist');
+    }
+    require(serviceExists(policyService), 'Service does not exist');
     uint256 policyId = policyStorage.addPolicy(policyRoles, policyService, policyProvider, hashedInfo);
     emit PolicyAdded(true, policyId, policyRoles, policyService, policyProvider, hashedInfo);
     return true;
@@ -131,18 +135,23 @@ contract PolicyRules is PolicyRulesList {
   }
 
   function removePolicy(uint256 policyId) external onlyAdmin onlyOnEditMode returns (bool) {
+    require(policyExists(policyId), 'Policy does not exist');
     bool removed = policyStorage.removePolicy(policyId);
     emit PolicyRemoved(removed, policyId);
     return removed;
   }
 
   function removeRole(uint256 roleId) external onlyAdmin onlyOnEditMode returns (bool) {
+    require(roleExists(roleId), 'Role does not exist');
+
     bool removed = policyStorage.removeRole(roleId);
     emit RoleRemoved(removed, roleId);
     return removed;
   }
 
   function removeService(uint256 serviceId) external onlyAdmin onlyOnEditMode returns (bool) {
+    require(serviceExists(serviceId), 'Service does not exist');
+
     bool removed = policyStorage.removeService(serviceId);
     emit ServiceRemoved(removed, serviceId);
     return removed;
