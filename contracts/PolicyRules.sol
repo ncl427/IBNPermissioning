@@ -29,21 +29,35 @@ contract PolicyRules is PolicyRulesList {
   PolicyIngress private ingressContract;
   PolicyStorage private policyStorage;
 
-  event PolicyAdded(bool policyAdded, uint256 policyId);
+  event PolicyAdded(
+    bool policyAdded,
+    uint256 policyId,
+    uint256[] policyRoles,
+    uint256 policyService,
+    address policyProvider,
+    string hashedInfo
+  );
 
-  event PolicyUpdated(bool policyUpdated, uint256 policyId);
+  event PolicyUpdated(
+    bool policyUpdated,
+    uint256 policyId,
+    uint256[] policyRoles,
+    uint256 policyService,
+    address policyProvider,
+    string hashedInf
+  );
 
   event PolicyRemoved(bool policyRemoved, uint256 policyId);
 
-  event RoleAdded(bool roleAdded, uint256 roleId);
+  event RoleAdded(bool roleAdded, uint256 roleId, string roleName, string roleType, string[] roleAttributes);
 
-  event RoleUpdated(bool roleUpdated, uint256 roleId);
+  event RoleUpdated(bool roleUpdated, uint256 roleId, string roleName, string roleType, string[] roleAttributes);
 
   event RoleRemoved(bool roleRemoved, uint256 roleId);
 
-  event ServiceAdded(bool serviceAdded, uint256 serviceId);
+  event ServiceAdded(bool serviceAdded, uint256 serviceId, string serviceName, string desc, string[] serviceConfig);
 
-  event ServiceUpdated(bool serviceUpdated, uint256 serviceId);
+  event ServiceUpdated(bool serviceUpdated, uint256 serviceId, string serviceName, string desc, string[] serviceConfig);
 
   event ServiceRemoved(bool serviceRemoved, uint256 serviceId);
 
@@ -91,7 +105,7 @@ contract PolicyRules is PolicyRulesList {
     string[] memory roleAttributes
   ) external onlyAdmin onlyOnEditMode returns (bool) {
     uint256 roleId = policyStorage.addRole(roleName, roleType, roleAttributes);
-    emit RoleAdded(true, roleId);
+    emit RoleAdded(true, roleId, roleName, roleType, roleAttributes);
     return true;
   }
 
@@ -102,7 +116,7 @@ contract PolicyRules is PolicyRulesList {
     string memory hashedInfo
   ) external onlyAdmin onlyOnEditMode returns (bool) {
     uint256 policyId = policyStorage.addPolicy(policyRoles, policyService, policyProvider, hashedInfo);
-    emit RoleAdded(true, policyId);
+    emit PolicyAdded(true, policyId, policyRoles, policyService, policyProvider, hashedInfo);
     return true;
   }
 
@@ -112,23 +126,26 @@ contract PolicyRules is PolicyRulesList {
     string[] memory serviceConfig
   ) external onlyAdmin onlyOnEditMode returns (bool) {
     uint256 serviceId = policyStorage.addService(serviceName, desc, serviceConfig);
-    emit RoleAdded(true, serviceId);
+    emit ServiceAdded(true, serviceId, serviceName, desc, serviceConfig);
     return true;
   }
 
   function removePolicy(uint256 policyId) external onlyAdmin onlyOnEditMode returns (bool) {
     bool removed = policyStorage.removePolicy(policyId);
-    emit RoleRemoved(removed, policyId);
+    emit PolicyRemoved(removed, policyId);
+    return removed;
   }
 
   function removeRole(uint256 roleId) external onlyAdmin onlyOnEditMode returns (bool) {
     bool removed = policyStorage.removeRole(roleId);
     emit RoleRemoved(removed, roleId);
+    return removed;
   }
 
   function removeService(uint256 serviceId) external onlyAdmin onlyOnEditMode returns (bool) {
     bool removed = policyStorage.removeService(serviceId);
-    emit RoleRemoved(removed, serviceId);
+    emit ServiceRemoved(removed, serviceId);
+    return removed;
   }
 
   function policiesSize() external view returns (uint256) {
