@@ -42,7 +42,7 @@ contract AccountStorage {
     mapping (address => identity) public permInfo; //Holds the information of the permissioned address
     mapping (address => uint256) private indexOf; //1 based indexing. 0 means non-existent
 
-    constructor (AccountIngress _ingressContract) public {
+constructor (AccountIngress _ingressContract) {
         ingressContract = _ingressContract;
         add(msg.sender);
     }

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { isAddress } from 'web3-utils';
 import idx from 'idx';
 // Context
-import { useAccountData } from '../../context/policyData';
+import { usePolicyData } from '../../context/policyData';
 import { useAdminData } from '../../context/adminData';
 // Utils
 import useTab from './useTabPolicy';
@@ -31,7 +31,7 @@ type PolicyTabContainerProps = {
   isOpen: boolean;
 };
 
-type Account = {
+type Policy = {
   policyId: BigNumber;
   identifier: string;
   policyRoles?: BigNumber[];
@@ -43,7 +43,7 @@ type Account = {
 
 const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, accountRulesContract } = useAccountData();
+  const { allowlist, isReadOnly, dataReady, policyRulesContract } = usePolicyData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
@@ -51,24 +51,24 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
   );
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
-  if (!!accountRulesContract) {
+  if (!!policyRulesContract) {
     const handleAdd = async (value: string) => {
       try {
-        const tx = await accountRulesContract!.functions.addPolicy([1, 2], 1, value, '');
+        const tx = await policyRulesContract!.functions.addPolicy([1, 2], 1, value, '');
         toggleModal('add')(false);
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
-        const addEvent = receipt.events!.filter(e => e.event && e.event === 'AccountAdded').pop();
+        const addEvent = receipt.events!.filter(e => e.event && e.event === 'PolicyAdded').pop();
         if (!addEvent) {
-          openToast(value, FAIL, `Error while processing account: ${value}`);
+          openToast(value, FAIL, `Error while processing policy: ${value}`);
         } else {
           const addSuccessResult = idx(addEvent, _ => _.args[0]);
           if (addSuccessResult === undefined) {
-            openToast(value, FAIL, `Error while adding account: ${value}`);
+            openToast(value, FAIL, `Error while adding policy: ${value}`);
           } else if (Boolean(addSuccessResult)) {
-            openToast(value, SUCCESS, `New account added: ${value}`);
+            openToast(value, SUCCESS, `New policy added: ${value}`);
           } else {
-            openToast(value, FAIL, `Account "${value}" is already added`);
+            openToast(value, FAIL, `Policy "${value}" is already added`);
           }
         }
         deleteTransaction(value);
@@ -76,19 +76,19 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
         toggleModal('add')(false);
         updateTransaction(value, FAIL_ADDITION);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not add account', `${value} was unable to be added. Please try again.`)
+          openToast(value, FAIL, 'Could not add policy', `${value} was unable to be added. Please try again.`)
         );
       }
     };
 
     const handleRemove = async (value: string) => {
       try {
-        const est = await accountRulesContract!.estimate.removePolicy(value);
-        const tx = await accountRulesContract!.functions.removePolicy(value, { gasLimit: est.toNumber() * 2 });
+        const est = await policyRulesContract!.estimate.removePolicy(value);
+        const tx = await policyRulesContract!.functions.removePolicy(value, { gasLimit: est.toNumber() * 2 });
         toggleModal('remove')(false);
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
-        openToast(value, SUCCESS, `Removal of account processed: ${value}`);
+        openToast(value, SUCCESS, `Removal of policy processed: ${value}`);
         deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
@@ -96,12 +96,12 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
         toggleModal('remove')(false);
         updateTransaction(value, FAIL_REMOVAL);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not remove account', `${value} was unable to be removed. Please try again.`)
+          openToast(value, FAIL, 'Could not remove policy', `${value} was unable to be removed. Please try again.`)
         );
       }
     };
 
-    const isValidAccount = (address: string) => {
+    const isValidPolicy = (address: string) => {
       let isValidAddress = isAddress(address);
       if (!isValidAddress) {
         return {
@@ -109,12 +109,12 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
         };
       }
 
-      let isDuplicateAccount =
-        list.filter((item: Account) => address.toLowerCase() === item.identifier.toLowerCase()).length > 0;
-      if (isDuplicateAccount) {
+      let isDuplicatePolicy =
+        list.filter((item: Policy) => address.toLowerCase() === item.identifier.toLowerCase()).length > 0;
+      if (isDuplicatePolicy) {
         return {
           valid: false,
-          msg: 'Account address is already added.'
+          msg: 'Policy address is already added.'
         };
       }
 
@@ -134,7 +134,7 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}
-          isValid={isValidAccount}
+          isValid={isValidPolicy}
           isOpen={isOpen}
           isReadOnly={isReadOnly!}
         />
@@ -144,8 +144,8 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
     } else {
       return <div />;
     }
-  } else if (isOpen && !accountRulesContract) {
-    return <NoContract tabName="Account Rules" />;
+  } else if (isOpen && !policyRulesContract) {
+    return <NoContract tabName="Policy Rules" />;
   } else {
     return <div />;
   }

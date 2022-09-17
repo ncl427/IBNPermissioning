@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 import { isAddress } from 'web3-utils';
 import idx from 'idx';
 // Context
-import { useAccountData } from '../../context/rolesData';
+import { useRoleData } from '../../context/rolesData';
 import { useAdminData } from '../../context/adminData';
 // Utils
-import useTab from './useTab';
+import useTab from './useTabRole';
 import { errorToast } from '../../util/tabTools';
 import { deleteZitiIdentity } from '../../util/api';
 
@@ -24,47 +24,49 @@ import {
   SUCCESS,
   FAIL
 } from '../../constants/transactions';
+//import { BigNumber } from 'ethers/utils';
 
 type RoleTabContainerProps = {
   isOpen: boolean;
 };
 
-type Account = {
-  address: string;
+type Role = {
+  roleId: string;
   identifier: string;
-  hashedInfo?: string;
-  enrolled?: boolean;
+  roleName?: string;
+  roleType?: string;
+  roleAttributes?: string[];
   status: string;
 };
 
 const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, accountRulesContract } = useAccountData();
+  const { allowlist, isReadOnly, dataReady, policyRulesContract } = useRoleData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
-    (identifier: string) => ({ address: identifier })
+    (identifier: string) => ({ roleId: identifier })
   );
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
-  if (!!accountRulesContract) {
-    const handleAdd = async (value: string) => {
+  if (!!policyRulesContract) {
+    const handleAdd = async (value: string, value2: string, value3: string[]) => {
       try {
-        const tx = await accountRulesContract!.functions.addAccount(value);
+        const tx = await policyRulesContract!.functions.addRole(value, value2, value3);
         toggleModal('add')(false);
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
-        const addEvent = receipt.events!.filter(e => e.event && e.event === 'AccountAdded').pop();
+        const addEvent = receipt.events!.filter(e => e.event && e.event === 'RoleAdded').pop();
         if (!addEvent) {
-          openToast(value, FAIL, `Error while processing account: ${value}`);
+          openToast(value, FAIL, `Error while processing role: ${value}`);
         } else {
           const addSuccessResult = idx(addEvent, _ => _.args[0]);
           if (addSuccessResult === undefined) {
-            openToast(value, FAIL, `Error while adding account: ${value}`);
+            openToast(value, FAIL, `Error while adding role: ${value}`);
           } else if (Boolean(addSuccessResult)) {
-            openToast(value, SUCCESS, `New account added: ${value}`);
+            openToast(value, SUCCESS, `New role added: ${value}`);
           } else {
-            openToast(value, FAIL, `Account "${value}" is already added`);
+            openToast(value, FAIL, `Role "${value}" is already added`);
           }
         }
         deleteTransaction(value);
@@ -72,19 +74,19 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
         toggleModal('add')(false);
         updateTransaction(value, FAIL_ADDITION);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not add account', `${value} was unable to be added. Please try again.`)
+          openToast(value, FAIL, 'Could not add role', `${value} was unable to be added. Please try again.`)
         );
       }
     };
 
     const handleRemove = async (value: string) => {
       try {
-        const est = await accountRulesContract!.estimate.removeAccount(value);
-        const tx = await accountRulesContract!.functions.removeAccount(value, { gasLimit: est.toNumber() * 2 });
+        const est = await policyRulesContract!.estimate.removeRole(value);
+        const tx = await policyRulesContract!.functions.removeRole(value, { gasLimit: est.toNumber() * 2 });
         toggleModal('remove')(false);
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
-        openToast(value, SUCCESS, `Removal of account processed: ${value}`);
+        openToast(value, SUCCESS, `Removal of role processed: ${value}`);
         deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
@@ -92,25 +94,60 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
         toggleModal('remove')(false);
         updateTransaction(value, FAIL_REMOVAL);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not remove account', `${value} was unable to be removed. Please try again.`)
+          openToast(value, FAIL, 'Could not remove role', `${value} was unable to be removed. Please try again.`)
         );
       }
     };
 
-    const isValidAccount = (address: string) => {
-      let isValidAddress = isAddress(address);
-      if (!isValidAddress) {
+    //Validate the Role Name
+    const isValidRole = (name: string) => {
+      let isValidRole = true;
+      if (!isValidRole) {
         return {
           valid: false
         };
       }
 
-      let isDuplicateAccount =
-        list.filter((item: Account) => address.toLowerCase() === item.address.toLowerCase()).length > 0;
-      if (isDuplicateAccount) {
+      let isDuplicateRole = list.filter((item: Role) => name.toLowerCase() === item.roleName?.toLowerCase()).length > 0;
+      if (isDuplicateRole) {
         return {
           valid: false,
-          msg: 'Account address is already added.'
+          msg: 'Role is already added.'
+        };
+      }
+
+      return {
+        valid: true
+      };
+    }; //Validate the Role Type
+    const isValidRole2 = (address: string) => {
+      let isValidRole = true;
+      if (!isValidRole) {
+        return {
+          valid: false
+        };
+      }
+
+      /*       let isDuplicateRole =
+        list.filter((item: Role) => address.toString() === item.identifier.toLowerCase()).length > 0;
+      if (isDuplicateRole) {
+        return {
+          valid: false,
+          msg: 'Role address is already added.'
+        };
+      } */
+
+      return {
+        valid: true
+      };
+    };
+
+    //Validate the Role attributes
+    const isValidRole3 = (attribute: string[]) => {
+      let isValidRole = true;
+      if (!isValidRole) {
+        return {
+          valid: false
         };
       }
 
@@ -130,7 +167,8 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}
-          isValid={isValidAccount}
+          isValidString={isValidRole}
+          isValidArray={isValidRole3}
           isOpen={isOpen}
           isReadOnly={isReadOnly!}
         />
@@ -140,8 +178,8 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
     } else {
       return <div />;
     }
-  } else if (isOpen && !accountRulesContract) {
-    return <NoContract tabName="Account Rules" />;
+  } else if (isOpen && !policyRulesContract) {
+    return <NoContract tabName="Role Rules" />;
   } else {
     return <div />;
   }

@@ -49,7 +49,7 @@ contract PolicyRules is PolicyRulesList {
 
   event PolicyRemoved(bool policyRemoved, uint256 policyId);
 
-  event RoleAdded(bool roleAdded, uint256 roleId, string roleName, string roleType, string[] roleAttributes);
+  event RoleAdded(bool roleAdded, uint256 roleId, string roleName, uint256 roleType, string[] roleAttributes);
 
   event RoleUpdated(bool roleUpdated, uint256 roleId, string roleName, string roleType, string[] roleAttributes);
 
@@ -99,11 +99,22 @@ contract PolicyRules is PolicyRulesList {
     return true;
   }
 
+  function addRoleType(string memory roleTypeName, string memory roleAttributes)
+    external
+    onlyAdmin
+    onlyOnEditMode
+    returns (bool)
+  {
+    policyStorage.addRoleType(roleTypeName, roleAttributes);
+    return true;
+  }
+
   function addRole(
     string memory roleName,
-    string memory roleType,
+    uint256 roleType,
     string[] memory roleAttributes
   ) external onlyAdmin onlyOnEditMode returns (bool) {
+    require(roleTypeExists(roleType), 'RoleType does not exist');
     uint256 roleId = policyStorage.addRole(roleName, roleType, roleAttributes);
     emit RoleAdded(true, roleId, roleName, roleType, roleAttributes);
     return true;
@@ -163,6 +174,10 @@ contract PolicyRules is PolicyRulesList {
 
   function rolesSize() external view returns (uint256) {
     return policyStorage.rolesSize();
+  }
+
+  function roleTypesSize() external view returns (uint256) {
+    return policyStorage.roleTypesSize();
   }
 
   function servicesSize() external view returns (uint256) {

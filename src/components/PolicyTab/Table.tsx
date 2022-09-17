@@ -3,8 +3,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, TableCell } from '@material-ui/core';
 // Components
-import AccountTableHeader from './TableHeader';
-import AccountRow from './Row';
+import PolicyTableHeader from './TableHeader';
+import PolicyRow from './Row';
 import EmptyRow from './EmptyRow';
 // Styles
 import styles from './styles.module.scss';
@@ -20,7 +20,7 @@ type PolicyTable = {
 const PolicyTable: React.FC<PolicyTable> = ({ list, toggleModal, deleteTransaction, isAdmin, isReadOnly }) => (
   <Box mt={5}>
     <TableContainer component={Paper}>
-      <AccountTableHeader
+      <PolicyTableHeader
         number={list.length}
         openAddModal={() => toggleModal('add')(true)}
         disabledAdd={!isAdmin || isReadOnly}
@@ -44,7 +44,7 @@ const PolicyTable: React.FC<PolicyTable> = ({ list, toggleModal, deleteTransacti
             <TableCell>0xec41013c2C91F2E2Cd0450F6faf38d74141b90F5</TableCell>
           </TableRow>
           {/*           {list.map(({ address, status, hashedInfo, enrolled }) => (
-            <AccountRow
+            <PolicyRow
               key={address}
               address={address}
               hashedInfo={hashedInfo}

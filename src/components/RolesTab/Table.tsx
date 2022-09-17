@@ -3,14 +3,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, TableCell } from '@material-ui/core';
 // Components
-import AccountTableHeader from './TableHeader';
-import AccountRow from './Row';
+import RoleTableHeader from './TableHeader';
+import RoleRow from './Row';
 import EmptyRow from './EmptyRow';
 // Styles
 import styles from './styles.module.scss';
+//import { BigNumber } from 'ethers/utils';
 
 type RolesTable = {
-  list: { address: string; status: string; hashedInfo: string; enrolled: boolean }[];
+  list: { roleId: string; roleName: string; roleType: string; roleAttributes: string[]; status: string }[];
   toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
   deleteTransaction: (identifier: string) => void;
   isAdmin: boolean;
@@ -20,7 +21,7 @@ type RolesTable = {
 const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction, isAdmin, isReadOnly }) => (
   <Box mt={5}>
     <TableContainer component={Paper}>
-      <AccountTableHeader
+      <RoleTableHeader
         number={list.length}
         openAddModal={() => toggleModal('add')(true)}
         disabledAdd={!isAdmin || isReadOnly}
@@ -28,14 +29,16 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
       <Table size="small">
         <TableHead>
           <TableRow>
+            <TableCell className={styles.headerCell}>Role Id</TableCell>
             <TableCell className={styles.headerCell}>Role Name</TableCell>
-            <TableCell className={styles.headerCell}>Role Types</TableCell>
+            <TableCell className={styles.headerCell}>Role Type</TableCell>
+            <TableCell className={styles.headerCell}>Status</TableCell>
             {/*   <TableCell className={styles.headerCell}>Enrolled</TableCell>
             <TableCell className={styles.headerCell}>Status</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
+          {/*          <TableRow>
             <TableCell>IBN Manager</TableCell>
             <TableCell>Admin</TableCell>
           </TableRow>
@@ -46,20 +49,21 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
           <TableRow>
             <TableCell>Tester</TableCell>
             <TableCell>OTA</TableCell>
-          </TableRow>
-          {/*           {list.map(({ address, status, hashedInfo, enrolled }) => (
-            <AccountRow
-              key={address}
-              address={address}
-              hashedInfo={hashedInfo}
-              enrolled={enrolled}
+          </TableRow> */}
+          {list.map(({ roleId, roleName, roleType, roleAttributes, status }) => (
+            <RoleRow
+              key={roleId}
+              roleId={roleId}
+              roleName={roleName}
+              roleType={roleType}
+              roleAttributes={roleAttributes}
               status={status}
               isAdmin={isAdmin}
               deleteTransaction={deleteTransaction}
               openRemoveModal={toggleModal('remove')}
             />
           ))}
-          {list.length === 0 && <EmptyRow />} */}
+          {list.length === 0 && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

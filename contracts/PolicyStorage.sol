@@ -26,14 +26,21 @@ contract PolicyStorage {
   uint256 public rolesCount;
   uint256 public servicesCount;
   uint256 public policyCount;
+  uint256 public roleTypesCount;
 
   PolicyIngress private ingressContract;
 
   //** Added Struct for keeping extra information of the Policy information (Roles, Services) */
+
+  struct RoleTypes {
+    string roleTypeName;
+    string roleTypeAttributes; //Encoded JSON
+  }
+
   struct Roles {
     uint256 roleId;
     string roleName;
-    string roleType;
+    uint256 roleType;
     string[] roleAttributes;
   }
 
@@ -53,28 +60,35 @@ contract PolicyStorage {
   }
 
   // May use in another version
-  enum roleTypes {
+  /*  enum roleTypes {
     Admin,
     Subscriber,
     OneTime
-  }
+  } */
 
   uint256[] public policylist;
   uint256[] public rolelist;
   uint256[] public servicelist;
+  uint256[] public roleTypelist;
 
   mapping(uint256 => uint256) private indexOfPolicy; //1 based indexing. 0 means non-existent
   mapping(uint256 => uint256) private indexOfRoles; //1 based indexing. 0 means non-existent
   mapping(uint256 => uint256) private indexOfServices; //1 based indexing. 0 means non-existent
+  mapping(uint256 => uint256) private indexOfRoleTypes; //1 based indexing. 0 means non-existent
 
   //Mapping for Service Providers
-  mapping(address => uint256) public providedService;
+  mapping(address => Services) public providedService;
+  //Mapping of roleIds to RoleTypes
+  mapping(uint256 => RoleTypes) public roleToTypes;
+
   //The official record of all roles ever created
   mapping(uint256 => Roles) public roles;
   //The official record of all services ever created
   mapping(uint256 => Services) public services;
   //The official record of all policies ever created
   mapping(uint256 => Policies) public policies;
+  //The official record of all RoleTypes ever created
+  mapping(uint256 => RoleTypes) public roleTypes;
 
   constructor(PolicyIngress _ingressContract) {
     ingressContract = _ingressContract;
@@ -114,6 +128,10 @@ contract PolicyStorage {
     return servicelist.length;
   }
 
+  function roleTypesSize() public view returns (uint256) {
+    return roleTypelist.length;
+  }
+
   function policyExists(uint256 _policyId) public view returns (bool) {
     return indexOfPolicy[_policyId] != 0;
   }
@@ -126,23 +144,38 @@ contract PolicyStorage {
     return indexOfServices[_serviceId] != 0;
   }
 
+  function roleTypeExists(uint256 _roleTypeId) public view returns (bool) {
+    return indexOfRoleTypes[_roleTypeId] != 0;
+  }
+
+  //** Add Role Types */
+  function addRoleType(string memory roleTypeName, string memory roleAttributes) public onlyLatestVersion {
+    roleTypesCount++; //Find a better way for unique Ids
+    RoleTypes memory newRoleType = RoleTypes({roleTypeName: roleTypeName, roleTypeAttributes: roleAttributes});
+
+    roleTypelist.push(roleTypesCount);
+    indexOfRoleTypes[roleTypesCount] = roleTypelist.length;
+    roleTypes[roleTypesCount] = newRoleType;
+  }
+
   //** Add Roles */
   function addRole(
     string memory roleName,
-    string memory roleType,
+    uint256 roleTypeId,
     string[] memory roleAttributes
   ) public onlyLatestVersion returns (uint256) {
     rolesCount++; //Find a better way for unique Ids
     Roles memory newRole = Roles({
       roleId: rolesCount,
       roleName: roleName,
-      roleType: roleType,
+      roleType: roleTypeId,
       roleAttributes: roleAttributes
     });
 
     rolelist.push(rolesCount);
     indexOfRoles[rolesCount] = rolelist.length;
     roles[rolesCount] = newRole;
+    roleToTypes[newRole.roleId] = roleTypes[roleTypeId]; //Mapped the role to a type
     return newRole.roleId;
   }
 
@@ -185,6 +218,8 @@ contract PolicyStorage {
     policylist.push(policyCount);
     indexOfPolicy[policyCount] = policylist.length;
     policies[policyCount] = newPolicy;
+    providedService[policyProvider] = services[policyService]; //Mapped the Provider to a Service
+
     return newPolicy.policyId;
   }
 
@@ -203,6 +238,7 @@ contract PolicyStorage {
       //shrink array
       rolelist.pop();
       indexOfRoles[roleId] = 0;
+      delete roleToTypes[roleId];
       delete roles[roleId];
 
       return true;
@@ -225,7 +261,9 @@ contract PolicyStorage {
       //shrink array
       servicelist.pop();
       indexOfServices[serviceId] = 0;
+
       delete services[serviceId];
+
       return true;
     }
     return false;
@@ -246,6 +284,8 @@ contract PolicyStorage {
       //shrink array
       policylist.pop();
       indexOfPolicy[policyId] = 0;
+      address provider = policies[policyId].policyProvider;
+      delete providedService[provider];
       delete policies[policyId];
       return true;
     }
@@ -303,6 +343,10 @@ contract PolicyStorage {
     return servicelist[index];
   }
 
+  function getRoleTypeByIndex(uint256 index) public view returns (uint256 roleTypeId) {
+    return roleTypelist[index];
+  }
+
   //** Full policy Information */
   function getFullPolicyById(uint256 policyId)
     public
@@ -328,7 +372,7 @@ contract PolicyStorage {
     view
     returns (
       string memory roleName,
-      string memory roleType,
+      uint256 roleType,
       string[] memory roleAttributes
     )
   {
@@ -348,6 +392,15 @@ contract PolicyStorage {
     return (services[serviceId].serviceName, services[serviceId].description, services[serviceId].serviceConfig);
   }
 
+  //** Full RoleType Information */
+  function getFullRoleTypeById(uint256 roleTypeId)
+    public
+    view
+    returns (string memory roleTypeName, string memory roleTypeAttributes)
+  {
+    return (roleTypes[roleTypeId].roleTypeName, roleTypes[roleTypeId].roleTypeAttributes);
+  }
+
   function getPolicies() public view returns (uint256[] memory) {
     return policylist;
   }
@@ -358,5 +411,9 @@ contract PolicyStorage {
 
   function getServices() public view returns (uint256[] memory) {
     return rolelist;
+  }
+
+  function getRoleTypes() public view returns (uint256[] memory) {
+    return roleTypelist;
   }
 }

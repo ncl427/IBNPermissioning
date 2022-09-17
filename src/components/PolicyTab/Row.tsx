@@ -9,7 +9,7 @@ import TextWithTooltip from './TextWithTooltip';
 // Styles
 import styles from './styles.module.scss';
 
-type AccountRow = {
+type PolicyRow = {
   address: string;
   hashedInfo: string;
   enrolled: boolean;
@@ -19,7 +19,7 @@ type AccountRow = {
   openRemoveModal: (address: string) => void;
 };
 
-const AccountRow: React.FC<AccountRow> = ({
+const PolicyRow: React.FC<PolicyRow> = ({
   address,
   status,
   hashedInfo,
@@ -70,7 +70,7 @@ const AccountRow: React.FC<AccountRow> = ({
   </TableRow>
 );
 
-AccountRow.propTypes = {
+PolicyRow.propTypes = {
   address: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
   isAdmin: PropTypes.bool.isRequired,
@@ -78,4 +78,4 @@ AccountRow.propTypes = {
   openRemoveModal: PropTypes.func.isRequired
 };
 
-export default AccountRow;
+export default PolicyRow;

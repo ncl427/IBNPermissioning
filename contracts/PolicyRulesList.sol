@@ -18,9 +18,14 @@ import './PolicyStorage.sol';
 
 contract PolicyRulesList {
   //** Added Struct for keeping extra information of the Policy information (Roles, Services) */
+
+  struct RoleTypes {
+    string roleTypeName;
+    string roleTypeAttributes; //Encoded JSON
+  }
   struct Roles {
     uint256 roleId;
-    string roleName;
+    uint256 roleName;
     string roleType;
     string[] roleAttributes;
   }
@@ -39,7 +44,6 @@ contract PolicyRulesList {
     address policyProvider;
     string hashedInfo;
   }
-
 
   PolicyStorage private policyStorage;
 
@@ -63,6 +67,9 @@ contract PolicyRulesList {
     return policyStorage.serviceExists(_serviceId);
   }
 
+    function roleTypeExists(uint256 _roleTypeId) public view returns (bool) {
+    return policyStorage.roleTypeExists(_roleTypeId);
+  }
 
   //** ADDED this function for modifying permissioned account information */
   /*    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType )  internal returns (bool) {
@@ -79,6 +86,11 @@ contract PolicyRulesList {
 
   function getPolicyByIndex(uint256 index) public view returns (uint256 policyId) {
     return policyStorage.getPolicyByIndex(index);
+  }
+
+
+  function getRoleTypeByIndex(uint256 index) public view returns (uint256 roleTypeId) {
+    return policyStorage.getRoleTypeByIndex(index);
   }
 
   //** ADDED this function for getting the information associated to an address */
@@ -100,7 +112,7 @@ contract PolicyRulesList {
     view
     returns (
       string memory roleName,
-      string memory roleType,
+      uint roleType,
       string[] memory roleAttributes
     )
   {
@@ -119,15 +131,31 @@ contract PolicyRulesList {
     return policyStorage.getFullServiceById(serviceId);
   }
 
+ 
+  function getFullRoleTypeById(uint256 roleTypeId)
+    public
+    view
+    returns (
+      string memory roleTypeName,
+      string memory roleTypeAttributes
+     )
+  {
+    return policyStorage.getFullRoleTypeById(roleTypeId);
+  }
+
   function getPolicies() public view returns (uint256[] memory) {
     return policyStorage.getPolicies();
   }
 
   function getRoles() public view returns (uint256[] memory) {
-    return policyStorage.getPolicies();
+    return policyStorage.getRoles();
   }
 
   function getServices() public view returns (uint256[] memory) {
-    return policyStorage.getPolicies();
+    return policyStorage.getServices();
+  }
+
+  function getRoleTypes() public view returns (uint256[] memory) {
+    return policyStorage.getRoleTypes();
   }
 }

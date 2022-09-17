@@ -6,7 +6,7 @@ import PolicyTable from './Table';
 import AddModal from '../../containers/Modals/Add';
 import RemoveModal from '../../containers/Modals/Remove';
 // Constants
-import { addAccountDisplay, removeAccountDisplay } from '../../constants/modals';
+import { addPolicyDisplay, removePolicyDisplay } from '../../constants/modals';
 
 type PolicyTab = {
   list: any[];
@@ -51,7 +51,7 @@ const PolicyTab: React.FC<PolicyTab> = ({
           isOpen={Boolean(modals.add) && isAdmin}
           closeModal={() => toggleModal('add')(false)}
           handleAdd={handleAdd}
-          display={addAccountDisplay}
+          display={addPolicyDisplay}
           isValid={isValid}
         />
         <RemoveModal
@@ -59,7 +59,7 @@ const PolicyTab: React.FC<PolicyTab> = ({
           value={modals.remove}
           closeModal={() => toggleModal('remove')(false)}
           handleRemove={handleRemove}
-          display={removeAccountDisplay(modals.remove)}
+          display={removePolicyDisplay(modals.remove)}
         />
       </Fragment>
     )}

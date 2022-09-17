@@ -3,10 +3,11 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 // Components
 import RolesTable from './Table';
-import AddModal from '../../containers/Modals/Add';
+import AddModal from '../../containers/Modals/AddRole';
 import RemoveModal from '../../containers/Modals/Remove';
 // Constants
-import { addAccountDisplay, removeAccountDisplay } from '../../constants/modals';
+import { addRoleDisplay, removeRoleDisplay } from '../../constants/modals';
+//import { BigNumber } from 'ethers/utils';
 
 type RolesTab = {
   list: any[];
@@ -16,11 +17,13 @@ type RolesTab = {
     lock: boolean;
   };
   toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
-  handleAdd: (value: any) => Promise<void>;
+  handleAdd: (value: string, value2: string, value3: string[]) => Promise<void>;
   handleRemove: (value: any) => Promise<void>;
   isAdmin: boolean;
   deleteTransaction: (identifier: string) => void;
-  isValid: (address: string) => { valid: boolean };
+  isValidString: (value: string) => { valid: boolean };
+  //isValidBigNumber: (value: BigNumber) => { valid: boolean; };
+  isValidArray: (value: string[]) => { valid: boolean };
   isOpen: boolean;
   isReadOnly: boolean;
 };
@@ -33,7 +36,9 @@ const RolesTab: React.FC<RolesTab> = ({
   handleRemove,
   isAdmin,
   deleteTransaction,
-  isValid,
+  isValidString,
+  //isValidBigNumber,
+  isValidArray,
   isOpen,
   isReadOnly
 }) => (
@@ -51,15 +56,16 @@ const RolesTab: React.FC<RolesTab> = ({
           isOpen={Boolean(modals.add) && isAdmin}
           closeModal={() => toggleModal('add')(false)}
           handleAdd={handleAdd}
-          display={addAccountDisplay}
-          isValid={isValid}
+          display={addRoleDisplay}
+          isValidString={isValidString}
+          isValidArray={isValidArray}
         />
         <RemoveModal
           isOpen={Boolean(modals.remove) && isAdmin}
           value={modals.remove}
           closeModal={() => toggleModal('remove')(false)}
           handleRemove={handleRemove}
-          display={removeAccountDisplay(modals.remove)}
+          display={removeRoleDisplay(modals.remove)}
         />
       </Fragment>
     )}
@@ -78,7 +84,8 @@ RolesTab.propTypes = {
   handleRemove: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   deleteTransaction: PropTypes.func.isRequired,
-  isValid: PropTypes.func.isRequired,
+  isValidString: PropTypes.func.isRequired,
+  isValidArray: PropTypes.func.isRequired,
   isReadOnly: PropTypes.bool.isRequired
 };
 
