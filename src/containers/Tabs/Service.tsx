@@ -4,15 +4,15 @@ import PropTypes from 'prop-types';
 import { isAddress } from 'web3-utils';
 import idx from 'idx';
 // Context
-import { useAccountData } from '../../context/serviceData';
+import { useServiceData } from '../../context/serviceData';
 import { useAdminData } from '../../context/adminData';
 // Utils
-import useTab from './useTab';
+import useTab from './useTabService';
 import { errorToast } from '../../util/tabTools';
 import { deleteZitiIdentity } from '../../util/api';
 
 // Components
-import ServiceTab from '../../components/ServiceTab/ServiceTab';
+import ServicesTab from '../../components/ServiceTab/ServiceTab';
 import LoadingPage from '../../components/LoadingPage/LoadingPage';
 import NoContract from '../../components/Flashes/NoContract';
 // Constants
@@ -24,47 +24,49 @@ import {
   SUCCESS,
   FAIL
 } from '../../constants/transactions';
+//import { BigNumber } from 'ethers/utils';
 
 type ServiceTabContainerProps = {
   isOpen: boolean;
 };
 
-type Account = {
-  address: string;
+type Service = {
+  serviceId: string;
   identifier: string;
-  hashedInfo?: string;
-  enrolled?: boolean;
+  serviceName?: string;
+  serviceDescription?: string;
+  serviceConfig?: string[];
   status: string;
 };
 
 const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, accountRulesContract } = useAccountData();
+  const { allowlist, isReadOnly, dataReady, policyRulesContract } = useServiceData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
-    (identifier: string) => ({ address: identifier })
+    (identifier: string) => ({ serviceId: identifier })
   );
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
-  if (!!accountRulesContract) {
-    const handleAdd = async (value: string) => {
+  if (!!policyRulesContract) {
+    const handleAdd = async (value: string, value2: string, value3: string[]) => {
       try {
-        const tx = await accountRulesContract!.functions.addAccount(value);
+        const tx = await policyRulesContract!.functions.addService(value, value2, value3);
         toggleModal('add')(false);
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
-        const addEvent = receipt.events!.filter(e => e.event && e.event === 'AccountAdded').pop();
+        const addEvent = receipt.events!.filter(e => e.event && e.event === 'ServiceAdded').pop();
         if (!addEvent) {
-          openToast(value, FAIL, `Error while processing account: ${value}`);
+          openToast(value, FAIL, `Error while processing service: ${value}`);
         } else {
           const addSuccessResult = idx(addEvent, _ => _.args[0]);
           if (addSuccessResult === undefined) {
-            openToast(value, FAIL, `Error while adding account: ${value}`);
+            openToast(value, FAIL, `Error while adding service: ${value}`);
           } else if (Boolean(addSuccessResult)) {
-            openToast(value, SUCCESS, `New account added: ${value}`);
+            openToast(value, SUCCESS, `New service added: ${value}`);
           } else {
-            openToast(value, FAIL, `Account "${value}" is already added`);
+            openToast(value, FAIL, `Service "${value}" is already added`);
           }
         }
         deleteTransaction(value);
@@ -72,19 +74,19 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
         toggleModal('add')(false);
         updateTransaction(value, FAIL_ADDITION);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not add account', `${value} was unable to be added. Please try again.`)
+          openToast(value, FAIL, 'Could not add service', `${value} was unable to be added. Please try again.`)
         );
       }
     };
 
     const handleRemove = async (value: string) => {
       try {
-        const est = await accountRulesContract!.estimate.removeAccount(value);
-        const tx = await accountRulesContract!.functions.removeAccount(value, { gasLimit: est.toNumber() * 2 });
+        const est = await policyRulesContract!.estimate.removeService(value);
+        const tx = await policyRulesContract!.functions.removeService(value, { gasLimit: est.toNumber() * 2 });
         toggleModal('remove')(false);
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
-        openToast(value, SUCCESS, `Removal of account processed: ${value}`);
+        openToast(value, SUCCESS, `Removal of service processed: ${value}`);
         deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
@@ -92,25 +94,61 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
         toggleModal('remove')(false);
         updateTransaction(value, FAIL_REMOVAL);
         errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not remove account', `${value} was unable to be removed. Please try again.`)
+          openToast(value, FAIL, 'Could not remove service', `${value} was unable to be removed. Please try again.`)
         );
       }
     };
 
-    const isValidAccount = (address: string) => {
-      let isValidAddress = isAddress(address);
-      if (!isValidAddress) {
+    //Validate the Service Name
+    const isValidService = (name: string) => {
+      let isValidService = true;
+      if (!isValidService) {
         return {
           valid: false
         };
       }
 
-      let isDuplicateAccount =
-        list.filter((item: Account) => address.toLowerCase() === item.address.toLowerCase()).length > 0;
-      if (isDuplicateAccount) {
+      let isDuplicateService =
+        list.filter((item: Service) => name.toLowerCase() === item.serviceName?.toLowerCase()).length > 0;
+      if (isDuplicateService) {
         return {
           valid: false,
-          msg: 'Account address is already added.'
+          msg: 'Service is already added.'
+        };
+      }
+
+      return {
+        valid: true
+      };
+    }; //Validate the Service Type
+    const isValidService2 = (address: string) => {
+      let isValidService = true;
+      if (!isValidService) {
+        return {
+          valid: false
+        };
+      }
+
+      /*       let isDuplicateService =
+        list.filter((item: Service) => address.toString() === item.identifier.toLowerCase()).length > 0;
+      if (isDuplicateService) {
+        return {
+          valid: false,
+          msg: 'Service address is already added.'
+        };
+      } */
+
+      return {
+        valid: true
+      };
+    };
+
+    //Validate the Service attributes
+    const isValidService3 = (attribute: string[]) => {
+      let isValidService = true;
+      if (!isValidService) {
+        return {
+          valid: false
         };
       }
 
@@ -122,7 +160,7 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
     const allDataReady: boolean = dataReady && adminDataReady;
     if (isOpen && allDataReady) {
       return (
-        <ServiceTab
+        <ServicesTab
           list={list}
           modals={modals}
           toggleModal={toggleModal}
@@ -130,7 +168,8 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}
-          isValid={isValidAccount}
+          isValidString={isValidService}
+          isValidArray={isValidService3}
           isOpen={isOpen}
           isReadOnly={isReadOnly!}
         />
@@ -140,8 +179,8 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
     } else {
       return <div />;
     }
-  } else if (isOpen && !accountRulesContract) {
-    return <NoContract tabName="Account Rules" />;
+  } else if (isOpen && !policyRulesContract) {
+    return <NoContract tabName="Service Rules" />;
   } else {
     return <div />;
   }

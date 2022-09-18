@@ -1,60 +1,75 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { AccountRules } from '../chain/@types/AccountRules';
-import { accountRulesFactory } from '../chain/contracts/AccountRules';
+import { PolicyRules } from '../chain/@types/PolicyRules';
+import { policyRulesFactory } from '../chain/contracts/PolicyRules';
 import { useNetwork } from './network';
+import { BigNumber } from 'ethers/utils';
 
-type Account = { address: string; hashedInfo: string; enrolled: boolean };
-//type Identity = { hashedInfo: string, enrolled: boolean };
+//import BigNumber from 'bignumber.js'
+
+type Service = {
+  serviceId: string;
+  serviceName: string;
+  serviceDescription: string;
+  serviceConfig: string[];
+};
+
+//type Service = { hashedInfo: string, enrolled: boolean };
 
 type ContextType =
   | {
-      accountList: Account[];
-      setAccountList: React.Dispatch<React.SetStateAction<Account[]>>;
-      //hashList: Identity[];
-      //setHashList: React.Dispatch<React.SetStateAction<Identity[]>>;
-      accountReadOnly?: boolean;
-      setAccountReadOnly: React.Dispatch<React.SetStateAction<boolean | undefined>>;
-      accountRulesContract?: AccountRules;
-      setAccountRulesContract: React.Dispatch<React.SetStateAction<AccountRules | undefined>>;
+      serviceList: Service[];
+      setServiceList: React.Dispatch<React.SetStateAction<Service[]>>;
+      serviceReadOnly?: boolean;
+      setServiceReadOnly: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+      policyRulesContract?: PolicyRules;
+      setPolicyRulesContract: React.Dispatch<React.SetStateAction<PolicyRules | undefined>>;
     }
   | undefined;
 
-const AccountDataContext = createContext<ContextType>(undefined);
+const ServiceDataContext = createContext<ContextType>(undefined);
 
-// //LOADS the HAshed policy and enrolled status from the Blockchain
+// //LOADS the HAshed service and enrolled status from the Blockchain
 
-const loadAccountData = (
-  accountRulesContract: AccountRules | undefined,
-  setAccountList: (account: Account[]) => void,
-  setAccountReadOnly: (readOnly?: boolean) => void
+const loadServiceData = (
+  policyRulesContract: PolicyRules | undefined,
+  setServiceList: (service: Service[]) => void,
+  setServiceReadOnly: (readOnly?: boolean) => void
 ) => {
-  if (accountRulesContract === undefined) {
-    setAccountList([]);
-    setAccountReadOnly(undefined);
+  if (policyRulesContract === undefined) {
+    setServiceList([]);
+    setServiceReadOnly(undefined);
   } else {
-    accountRulesContract.functions.isReadOnly().then(isReadOnly => setAccountReadOnly(isReadOnly));
-    accountRulesContract.functions.getSize().then(listSize => {
-      const listElementsPromises: Promise<string>[] = [];
+    policyRulesContract.functions.isReadOnly().then(isReadOnly => setServiceReadOnly(isReadOnly));
+    policyRulesContract.functions.servicesSize().then(listSize => {
+      const listElementsPromises: Promise<BigNumber>[] = [];
       let listHashPromises: Promise<any>[] = [];
+      let listHashPromise2: Promise<any>[] = [];
+
       for (let i = 0; listSize.gt(i); i++) {
-        listElementsPromises.push(accountRulesContract.functions.getByIndex(i));
+        listElementsPromises.push(policyRulesContract.functions.getServiceByIndex(i));
       }
       Promise.all(listElementsPromises).then(responses1 => {
-        listHashPromises = responses1.map(address => accountRulesContract.functions.getFullByAddress(address));
-        //setAccountList(responses1.map(address => ({ address })));
-        //console.log("HASHEDInfo: ", listHashPromises );
+        listHashPromises = responses1.map(serviceId => policyRulesContract.functions.getFullServiceById(serviceId));
+        //setServiceList(responses1.map(address => ({ address })));
+        console.log('HASHEDInfoPol: ', listHashPromises);
 
         Promise.all(listHashPromises).then(responses2 => {
-          // const zip = (a1: any[],a2: { [x: string]: any; }) => a1.map((x, i) => [x,a2[i]]);
-          // const listIdentities = zip(responses1, responses2)
-          //console.log("HASHEDInfo: ", listIdentities );
-          setAccountList(
-            responses2.map((identity, i) => {
-              const idobject: Account = { address: '', hashedInfo: '', enrolled: false };
-              idobject.address = responses1[i];
-              idobject.enrolled = identity.enrolled;
-              idobject.hashedInfo = identity.hashedInfo;
-              console.log('SERVICES', idobject);
+          setServiceList(
+            responses2.map((service, i) => {
+              const idobject: Service = {
+                serviceId: '',
+                serviceName: '',
+                serviceDescription: '',
+                serviceConfig: ['']
+              };
+
+              idobject.serviceId = responses1[i].toString();
+              idobject.serviceName = service.serviceName;
+              idobject.serviceConfig = service.serviceConfig;
+              idobject.serviceDescription = service.description;
+
+              console.log('SERVICE', idobject);
+
               return idobject;
             })
           );
@@ -64,139 +79,107 @@ const loadAccountData = (
   }
 };
 
-//  const loadExtraData = (
-//    accountRulesContract: AccountRules | undefined,
-//    setHashList: (account: Identity[]) => void) => {
-//    if (accountRulesContract === undefined) {
-//      setHashList([]);
-//    } else {
-//      accountRulesContract.functions.getSize().then(listSize => {
-//        const listElementsPromises : Promise<string>[] = [];
-//        let listHashPromises : Promise<any>[] = [];
-//        for (let i = 0; listSize.gt(i); i++) {
-//          listElementsPromises.push(accountRulesContract.functions.getByIndex(i));
-//        }
-//        Promise.all(listElementsPromises).then(responses => {
-//          console.log("Info: ", listElementsPromises );
-//          listHashPromises = responses.map(address =>  accountRulesContract.functions.getFullByAddress(address) );
-//          Promise.all(listHashPromises).then(responses => {
-//           console.log("HASHEDInfo: ", listHashPromises );
-//           setHashList(responses.map(identity => {
-//              const idobject: Identity = {hashedInfo: '', enrolled: false};
-//              idobject.enrolled = identity.enrolled;
-//              idobject.hashedInfo = identity.hashedInfo;
-//             return idobject;
-//           } ));
-//         });
-//        });
-
-//      });
-//    }
-//  };
-
 /**
- * Provider for the data context that contains the account list
- * @param {Object} props Props given to the ServiceDataProvider
+ * Provider for the data context that contains the service list
+ * @param {Object} props Props given to the ServicesDataProvider
  * @return The provider with the following value:
- *  - accountList: list of permitted accounts from Account Rules contract
- *  - setAccountList: setter for the allowlist state
+ *  - serviceList: list of permitted services from Service Rules contract
+ *  - setServiceList: setter for the allowlist state
  */
-export const ServiceDataProvider: React.FC<{}> = props => {
-  const [accountList, setAccountList] = useState<Account[]>([]);
-  //const [hashList, setHashList] = useState<Identity[]>([]);
-  const [accountReadOnly, setAccountReadOnly] = useState<boolean | undefined>(undefined);
-  const [accountRulesContract, setAccountRulesContract] = useState<AccountRules | undefined>(undefined);
+export const ServicesDataProvider: React.FC<{}> = props => {
+  const [serviceList, setServiceList] = useState<Service[]>([]);
+  const [serviceReadOnly, setServiceReadOnly] = useState<boolean | undefined>(undefined);
+  const [policyRulesContract, setPolicyRulesContract] = useState<PolicyRules | undefined>(undefined);
 
   const value = useMemo(
     () => ({
-      accountList: accountList,
-      setAccountList: setAccountList,
-      accountReadOnly,
-      setAccountReadOnly,
-      accountRulesContract,
-      setAccountRulesContract
+      serviceList: serviceList,
+      setServiceList: setServiceList,
+      serviceReadOnly,
+      setServiceReadOnly,
+      policyRulesContract,
+      setPolicyRulesContract
     }),
-    [accountList, setAccountList, accountReadOnly, setAccountReadOnly, accountRulesContract, setAccountRulesContract]
+    [serviceList, setServiceList, serviceReadOnly, setServiceReadOnly, policyRulesContract, setPolicyRulesContract]
   );
 
-  const { accountIngressContract } = useNetwork();
+  const { policyIngressContract } = useNetwork();
 
   useEffect(() => {
-    if (accountIngressContract === undefined) {
-      setAccountRulesContract(undefined);
+    if (policyIngressContract === undefined) {
+      setPolicyRulesContract(undefined);
     } else {
-      accountRulesFactory(accountIngressContract).then(contract => {
-        setAccountRulesContract(contract);
-        contract.removeAllListeners('AccountAdded');
-        contract.removeAllListeners('AccountRemoved');
-        contract.removeAllListeners('AccountUpdated');
-        contract.on('AccountAdded', (success, account, event) => {
+      policyRulesFactory(policyIngressContract).then(contract => {
+        setPolicyRulesContract(contract);
+        contract.removeAllListeners('ServiceAdded');
+        contract.removeAllListeners('ServiceRemoved');
+        contract.removeAllListeners('ServiceUpdated');
+        contract.on('ServiceAdded', (success, service, event) => {
           if (success) {
-            loadAccountData(contract, setAccountList, setAccountReadOnly);
-            //console.log("LIST: ", accountList);
+            loadServiceData(contract, setServiceList, setServiceReadOnly);
+            //console.log("LIST: ", serviceList);
           }
         });
-        contract.on('AccountUpdated', (success, account, event) => {
+        contract.on('ServiceUpdated', (success, service, event) => {
           if (success) {
-            loadAccountData(contract, setAccountList, setAccountReadOnly);
-            //console.log("LIST: ", accountList);
+            loadServiceData(contract, setServiceList, setServiceReadOnly);
+            //console.log("LIST: ", serviceList);
           }
         });
-        contract.on('AccountRemoved', (success, account, event) => {
+        contract.on('ServiceRemoved', (success, service, event) => {
           if (success) {
-            loadAccountData(contract, setAccountList, setAccountReadOnly);
+            loadServiceData(contract, setServiceList, setServiceReadOnly);
           }
         });
       });
     }
-  }, [accountIngressContract, setAccountList, setAccountReadOnly]);
+  }, [policyIngressContract, setServiceList, setServiceReadOnly]);
 
-  return <AccountDataContext.Provider value={value} {...props} />;
+  return <ServiceDataContext.Provider value={value} {...props} />;
 };
 
 /**
- * Fetch the appropriate account data on chain and synchronize with it
+ * Fetch the appropriate service data on chain and synchronize with it
  * @return {Object} Contains data of interest:
- *  - dataReady: true if isReadOnly and account allowlist are correctly fetched,
+ *  - dataReady: true if isReadOnly and service allowlist are correctly fetched,
  *  false otherwise
  *  - userAddress: Address of the user
- *  - isReadOnly: Account contract is lock or unlock,
- *  - allowlist: list of permitted accounts from Account contract,
+ *  - isReadOnly: Service contract is lock or unlock,
+ *  - allowlist: list of permitted services from Service contract,
  */
-export const useAccountData = () => {
-  const context = useContext(AccountDataContext);
+export const useServiceData = () => {
+  const context = useContext(ServiceDataContext);
 
   if (!context) {
-    throw new Error('useAccountData must be used within an ServiceDataProvider.');
+    throw new Error('useServiceData must be used within an ServicesDataProvider.');
   }
 
-  const { accountList, setAccountList, accountReadOnly, setAccountReadOnly, accountRulesContract } = context;
-  //console.log("LIST: ", accountList);
+  const { serviceList, setServiceList, serviceReadOnly, setServiceReadOnly, policyRulesContract } = context;
+  //console.log("LIST: ", serviceList);
   useEffect(() => {
-    loadAccountData(accountRulesContract, setAccountList, setAccountReadOnly);
-  }, [accountRulesContract, setAccountList, setAccountReadOnly]);
+    loadServiceData(policyRulesContract, setServiceList, setServiceReadOnly);
+  }, [policyRulesContract, setServiceList, setServiceReadOnly]);
 
-  const formattedAccountList = useMemo(() => {
-    return accountList
-      .map(account => ({
-        ...account,
-        identifier: account.address.toLowerCase(),
-        //hash: account.hashedInfo,
-        //enrolled: account.enrolled,
+  const formattedServiceList = useMemo(() => {
+    return serviceList
+      .map((service, i) => ({
+        ...service,
+        identifier: service.serviceId.toString(),
+
         status: 'active'
       }))
       .reverse();
-  }, [accountList]);
-  //console.log("LIST1: ", formattedAccountList);
+  }, [serviceList]);
+  console.log('SERVICELIST1---------------: ', formattedServiceList);
 
   const dataReady = useMemo(() => {
-    return accountRulesContract !== undefined && accountReadOnly !== undefined && accountList !== undefined;
-  }, [accountRulesContract, accountReadOnly, accountList]);
+    return policyRulesContract !== undefined && serviceReadOnly !== undefined && serviceList !== undefined;
+  }, [policyRulesContract, serviceReadOnly, serviceList]);
 
   return {
     dataReady,
-    allowlist: formattedAccountList,
-    isReadOnly: accountReadOnly,
-    accountRulesContract
+    allowlist: formattedServiceList,
+    isReadOnly: serviceReadOnly,
+    policyRulesContract
   };
 };

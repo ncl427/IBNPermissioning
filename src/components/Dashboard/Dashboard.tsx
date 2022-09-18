@@ -3,7 +3,7 @@ import React, { Fragment, memo } from 'react';
 import PropTypes from 'prop-types';
 import { AccountDataProvider } from '../../context/accountData';
 import { RolesDataProvider } from '../../context/rolesData';
-import { ServiceDataProvider } from '../../context/serviceData';
+import { ServicesDataProvider } from '../../context/serviceData';
 import { PolicyDataProvider } from '../../context/policyData';
 import { AdminDataProvider } from '../../context/adminData';
 import { NodeDataProvider } from '../../context/nodeData';
@@ -39,9 +39,9 @@ const Dashboard: React.FC<Dashboard> = ({ tab, setTab }) => (
           <RolesDataProvider>
             <RoleTab isOpen={tab === ROLES_TAB} />
           </RolesDataProvider>
-          <ServiceDataProvider>
+          <ServicesDataProvider>
             <ServiceTab isOpen={tab === SERVICES_TAB} />
-          </ServiceDataProvider>
+          </ServicesDataProvider>
           <PolicyDataProvider>
             <PolicyTab isOpen={tab === POLICY_TAB} />
           </PolicyDataProvider>

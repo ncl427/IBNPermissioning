@@ -57,8 +57,10 @@ export const addRoleDisplay: ModalDisplay = {
 export const addServiceDisplay: ModalDisplay = {
   submitText: 'Add Service',
   errorMessage: 'Service is not valid.',
-  inputPlaceholder: 'Ex: 0xAc03BB73b6a9e108530AFf4Df5077c2B3D481e5A',
-  label: 'Service Id',
+  inputPlaceholder: 'Ex: Video',
+  input2Placeholder: 'Ex: Description of the service',
+  input3Placeholder: 'Ex: Domain name and ports',
+  label: 'Adding services to the ZT&T system',
   heading: 'Add Service',
   subHeading: ''
 };
