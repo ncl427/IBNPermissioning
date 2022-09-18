@@ -2,14 +2,14 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { PolicyRules } from '../chain/@types/PolicyRules';
 import { policyRulesFactory } from '../chain/contracts/PolicyRules';
 import { useNetwork } from './network';
-import { BigNumber } from 'ethers/utils';
+import { BigNumber, BigNumberish } from 'ethers/utils';
 
 //import BigNumber from 'bignumber.js'
 
 type Policy = {
-  policyId: BigNumber;
-  policyRoles: BigNumber[];
-  policyService: BigNumber;
+  policyId: string;
+  //policyRoles: string;
+  //policyService: string;
   policyProvider: string;
   hashedInfo: string;
 };
@@ -19,8 +19,10 @@ type ContextType =
   | {
       policyList: Policy[];
       setPolicyList: React.Dispatch<React.SetStateAction<Policy[]>>;
-      //hashList: Policy[];
-      //setHashList: React.Dispatch<React.SetStateAction<Policy[]>>;
+      serviceList: string[];
+      setServiceList: React.Dispatch<React.SetStateAction<string[]>>;
+      roleList: string[];
+      setRoleList: React.Dispatch<React.SetStateAction<string[]>>;
       policyReadOnly?: boolean;
       setPolicyReadOnly: React.Dispatch<React.SetStateAction<boolean | undefined>>;
       policyRulesContract?: PolicyRules;
@@ -35,16 +37,22 @@ const PolicyDataContext = createContext<ContextType>(undefined);
 const loadPolicyData = (
   policyRulesContract: PolicyRules | undefined,
   setPolicyList: (policy: Policy[]) => void,
+  setServiceList: (type: string[]) => void,
+  setRoleList: (type: string[]) => void,
   setPolicyReadOnly: (readOnly?: boolean) => void
 ) => {
   if (policyRulesContract === undefined) {
     setPolicyList([]);
+    setServiceList([]);
+    setRoleList([]);
     setPolicyReadOnly(undefined);
   } else {
     policyRulesContract.functions.isReadOnly().then(isReadOnly => setPolicyReadOnly(isReadOnly));
     policyRulesContract.functions.policiesSize().then(listSize => {
       const listElementsPromises: Promise<BigNumber>[] = [];
       let listHashPromises: Promise<any>[] = [];
+      let listHashPromises2: Promise<any>[] = [];
+
       for (let i = 0; listSize.gt(i); i++) {
         listElementsPromises.push(policyRulesContract.functions.getPolicyByIndex(i));
       }
@@ -53,63 +61,75 @@ const loadPolicyData = (
         //setPolicyList(responses1.map(address => ({ address })));
         console.log('HASHEDInfoPol: ', listHashPromises);
 
-        Promise.all(listHashPromises).then(responses2 => {
-          // const zip = (a1: any[],a2: { [x: string]: any; }) => a1.map((x, i) => [x,a2[i]]);
-          // const listpolicies = zip(responses1, responses2)
-          //console.log("HASHEDInfo: ", listpolicies );
+        Promise.all(listHashPromises).then(async responses2 => {
           setPolicyList(
             responses2.map((policy, i) => {
               const idobject: Policy = {
-                policyId: new BigNumber(0),
-                policyRoles: [new BigNumber(0)],
-                policyService: new BigNumber(0),
+                policyId: '',
+                //policyRoles: '',
+                //policyService: '',
                 policyProvider: '',
                 hashedInfo: ''
               };
-              idobject.policyId = responses1[i];
-              idobject.policyRoles = policy.policyRoles;
-              idobject.policyService = policy.policyService;
+              idobject.policyId = responses1[i].toString();
+              //idobject.policyRoles = JSON.stringify(policy.policyRoles.map(String));
+              //idobject.policyService = policy.policyService.toString();;
               idobject.policyProvider = policy.policyProvider;
               idobject.hashedInfo = policy.hashedInfo;
               console.log('POLICY', idobject);
               return idobject;
             })
           );
+
+          //For getting the Service Names per each policy
+          Promise.all(
+            responses2.map(type => {
+              let result: Promise<string> = policyRulesContract.functions
+                .getFullServiceById(type.policyService)
+                .then(result => {
+                  return result.serviceName;
+                });
+              return result;
+            })
+          ).then(response3 => {
+            //console.log("NAAAAAAAAAAAAAAAAAAAMMMMMEEEESSS111", JSON.stringify(response3) )
+            setServiceList(response3);
+          });
+
+          //For getting the Role Names per each policy
+
+          listHashPromises2 = responses2.map(policy => {
+            let result: Promise<any>[] = [];
+
+            result = policy.policyRoles.map((roleId: BigNumberish) => {
+              let result2: Promise<string> = policyRulesContract.functions.getFullRoleById(roleId).then(result3 => {
+                return result3.roleName;
+              });
+              return result2;
+            });
+
+            const mapResult = Promise.all(result).then(result4 => {
+              //console.log("DEBUGROLELIST", JSON.stringify(result4.map(String)) );
+              return JSON.stringify(result4.map(String));
+            });
+
+            return mapResult;
+          });
+
+          // const  promise4all = await Promise.all(
+          //   listHashPromises2.map(function(innerPromiseArray) {
+          //        return Promise.all(innerPromiseArray);
+          //   })
+          // );
+          Promise.all(listHashPromises2).then(finalList => {
+            console.log('DEBUGROLELIST2', finalList);
+            setRoleList(finalList);
+          });
         });
       });
     });
   }
 };
-
-//  const loadExtraData = (
-//    policyRulesContract: PolicyRules | undefined,
-//    setHashList: (policy: Policy[]) => void) => {
-//    if (policyRulesContract === undefined) {
-//      setHashList([]);
-//    } else {
-//      policyRulesContract.functions.getSize().then(listSize => {
-//        const listElementsPromises : Promise<string>[] = [];
-//        let listHashPromises : Promise<any>[] = [];
-//        for (let i = 0; listSize.gt(i); i++) {
-//          listElementsPromises.push(policyRulesContract.functions.getByIndex(i));
-//        }
-//        Promise.all(listElementsPromises).then(responses => {
-//          console.log("Info: ", listElementsPromises );
-//          listHashPromises = responses.map(address =>  policyRulesContract.functions.getFullByAddress(address) );
-//          Promise.all(listHashPromises).then(responses => {
-//           console.log("HASHEDInfo: ", listHashPromises );
-//           setHashList(responses.map(policy => {
-//              const idobject: Policy = {hashedInfo: '', enrolled: false};
-//              idobject.enrolled = policy.enrolled;
-//              idobject.hashedInfo = policy.hashedInfo;
-//             return idobject;
-//           } ));
-//         });
-//        });
-
-//      });
-//    }
-//  };
 
 /**
  * Provider for the data context that contains the policy list
@@ -120,7 +140,8 @@ const loadPolicyData = (
  */
 export const PolicyDataProvider: React.FC<{}> = props => {
   const [policyList, setPolicyList] = useState<Policy[]>([]);
-  //const [hashList, setHashList] = useState<Policy[]>([]);
+  const [roleList, setRoleList] = useState<string[]>([]);
+  const [serviceList, setServiceList] = useState<string[]>([]);
   const [policyReadOnly, setPolicyReadOnly] = useState<boolean | undefined>(undefined);
   const [policyRulesContract, setPolicyRulesContract] = useState<PolicyRules | undefined>(undefined);
 
@@ -128,12 +149,27 @@ export const PolicyDataProvider: React.FC<{}> = props => {
     () => ({
       policyList: policyList,
       setPolicyList: setPolicyList,
+      roleList: roleList,
+      setRoleList: setRoleList,
+      serviceList: serviceList,
+      setServiceList: setServiceList,
       policyReadOnly,
       setPolicyReadOnly,
       policyRulesContract,
       setPolicyRulesContract
     }),
-    [policyList, setPolicyList, policyReadOnly, setPolicyReadOnly, policyRulesContract, setPolicyRulesContract]
+    [
+      policyList,
+      setPolicyList,
+      roleList,
+      setRoleList,
+      serviceList,
+      setServiceList,
+      policyReadOnly,
+      setPolicyReadOnly,
+      policyRulesContract,
+      setPolicyRulesContract
+    ]
   );
 
   const { policyIngressContract } = useNetwork();
@@ -149,24 +185,24 @@ export const PolicyDataProvider: React.FC<{}> = props => {
         contract.removeAllListeners('PolicyUpdated');
         contract.on('PolicyAdded', (success, policy, event) => {
           if (success) {
-            loadPolicyData(contract, setPolicyList, setPolicyReadOnly);
+            loadPolicyData(contract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly);
             //console.log("LIST: ", policyList);
           }
         });
         contract.on('PolicyUpdated', (success, policy, event) => {
           if (success) {
-            loadPolicyData(contract, setPolicyList, setPolicyReadOnly);
+            loadPolicyData(contract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly);
             //console.log("LIST: ", policyList);
           }
         });
         contract.on('PolicyRemoved', (success, policy, event) => {
           if (success) {
-            loadPolicyData(contract, setPolicyList, setPolicyReadOnly);
+            loadPolicyData(contract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly);
           }
         });
       });
     }
-  }, [policyIngressContract, setPolicyList, setPolicyReadOnly]);
+  }, [policyIngressContract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly]);
 
   return <PolicyDataContext.Provider value={value} {...props} />;
 };
@@ -187,28 +223,39 @@ export const usePolicyData = () => {
     throw new Error('usePolicyData must be used within an PolicyDataProvider.');
   }
 
-  const { policyList, setPolicyList, policyReadOnly, setPolicyReadOnly, policyRulesContract } = context;
+  const {
+    policyList,
+    setPolicyList,
+    policyReadOnly,
+    setPolicyReadOnly,
+    serviceList,
+    setServiceList,
+    roleList,
+    setRoleList,
+    policyRulesContract
+  } = context;
   //console.log("LIST: ", policyList);
   useEffect(() => {
-    loadPolicyData(policyRulesContract, setPolicyList, setPolicyReadOnly);
+    loadPolicyData(policyRulesContract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly);
   }, [policyRulesContract, setPolicyList, setPolicyReadOnly]);
 
   const formattedPolicyList = useMemo(() => {
     return policyList
-      .map(policy => ({
+      .map((policy, i) => ({
         ...policy,
         identifier: policy.policyId.toString(),
-        //hash: policy.hashedInfo,
-        //enrolled: policy.enrolled,
+        policyService: serviceList[i],
+        policyRoles: roleList[i],
+
         status: 'active'
       }))
       .reverse();
-  }, [policyList]);
-  //console.log("LIST1: ", formattedPolicyList);
+  }, [policyList, serviceList, roleList]);
+  console.log('POLICYLIST1---------------: ', formattedPolicyList);
 
   const dataReady = useMemo(() => {
     return policyRulesContract !== undefined && policyReadOnly !== undefined && policyList !== undefined;
-  }, [policyRulesContract, policyReadOnly, policyList]);
+  }, [policyRulesContract, policyReadOnly, policyList, serviceList, roleList]);
 
   return {
     dataReady,

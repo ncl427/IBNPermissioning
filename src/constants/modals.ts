@@ -37,8 +37,10 @@ export const addAccountDisplay: ModalDisplay = {
 export const addPolicyDisplay: ModalDisplay = {
   submitText: 'Add Policy',
   errorMessage: 'Policy is not valid.',
-  inputPlaceholder: 'Ex: 0xAc03BB73b6a9e108530AFf4Df5077c2B3D481e5A',
-  label: 'Policy Id',
+  inputPlaceholder: 'Ex: Role Ids separated by commas',
+  input2Placeholder: 'Ex: Service Id',
+  input3Placeholder: 'Ex: 0xAc03BB73b6a9e108530AFf4Df5077c2B3D481e5A',
+  label: 'Adding policies to the ZT&T system',
   heading: 'Add Policy',
   subHeading: ''
 };

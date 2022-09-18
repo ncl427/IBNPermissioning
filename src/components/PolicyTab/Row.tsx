@@ -8,43 +8,48 @@ import { PENDING_ADDITION, PENDING_REMOVAL, FAIL_ADDITION, FAIL_REMOVAL } from '
 import TextWithTooltip from './TextWithTooltip';
 // Styles
 import styles from './styles.module.scss';
+//import { BigNumber } from 'ethers/utils';
 
 type PolicyRow = {
-  address: string;
-  hashedInfo: string;
-  enrolled: boolean;
+  policyId: string;
+  policyRoles?: string;
+  policyService?: string;
+  policyProvider?: string;
+  hashedInfo?: string;
   status: string;
   isAdmin: boolean;
-  deleteTransaction: (address: string) => void;
-  openRemoveModal: (address: string) => void;
+  deleteTransaction: (policyId: string) => void;
+  openRemoveModal: (policyId: string) => void;
 };
 
 const PolicyRow: React.FC<PolicyRow> = ({
-  address,
+  policyId,
   status,
-  hashedInfo,
-  enrolled,
+  policyRoles,
+  policyService,
+  policyProvider,
   isAdmin,
   deleteTransaction,
   openRemoveModal
 }) => (
   <TableRow className={styles.row}>
     <TableCell>
-      <TextWithTooltip status={status} text={address} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={policyId} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
-      <TextWithTooltip status={status} text={hashedInfo} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={policyRoles} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
-      <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={policyService} isAdmin={isAdmin} />
+    </TableCell>
+    <TableCell>
+      <TextWithTooltip status={status} text={policyProvider} isAdmin={isAdmin} />
     </TableCell>
 
     <TableCell>
       <Grid container justifyContent="space-between" alignItems="center">
-        {enrolled === true ? (
-          <Chip color="primary" className={styles.pill} label="Enrolled" />
-        ) : status === 'active' ? (
-          <Chip color="default" className={styles.pill} label="Not Enrolled" />
+        {status === 'active' ? (
+          <Chip color="default" className={styles.pill} label="Active" />
         ) : status === PENDING_ADDITION ? (
           <Chip color="secondary" className={styles.pill} label="Pending Addition" />
         ) : status === PENDING_REMOVAL ? (
@@ -52,18 +57,18 @@ const PolicyRow: React.FC<PolicyRow> = ({
         ) : status === FAIL_ADDITION ? (
           <Grid>
             <Chip className={styles.pill} label="Addition Failed" />
-            <Chip color="secondary" className={styles.pill} onClick={() => deleteTransaction(address)} label="Clear" />
+            <Chip color="secondary" className={styles.pill} onClick={() => deleteTransaction(policyId)} label="Clear" />
           </Grid>
         ) : status === FAIL_REMOVAL ? (
           <Grid>
             <Chip className={styles.pill} label="Removal Failed" />
-            <Chip color="secondary" className={styles.pill} onClick={() => deleteTransaction(address)} label="Clear" />
+            <Chip color="secondary" className={styles.pill} onClick={() => deleteTransaction(policyId)} label="Clear" />
           </Grid>
         ) : (
           <div />
         )}
         {isAdmin && status === 'active' && (
-          <Chip className={styles.removeIcon} onDelete={() => openRemoveModal(address)} />
+          <Chip className={styles.removeIcon} onDelete={() => openRemoveModal(policyId)} />
         )}
       </Grid>
     </TableCell>
@@ -71,7 +76,6 @@ const PolicyRow: React.FC<PolicyRow> = ({
 );
 
 PolicyRow.propTypes = {
-  address: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   deleteTransaction: PropTypes.func.isRequired,

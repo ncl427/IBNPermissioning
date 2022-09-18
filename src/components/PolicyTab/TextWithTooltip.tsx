@@ -11,10 +11,11 @@ import styles from './styles.module.scss';
 type TextWithTooltip = {
   status: string;
   isAdmin: boolean;
-  text: string;
+  text?: string;
+  textArray?: string[];
 };
 
-const TextWithTooltip: React.FC<TextWithTooltip> = ({ status, isAdmin, text }) => {
+const TextWithTooltip: React.FC<TextWithTooltip> = ({ status, isAdmin, text, textArray }) => {
   return status === PENDING_ADDITION || status === PENDING_REMOVAL || !isAdmin ? (
     <Tooltip
       placement="bottom"
@@ -32,6 +33,7 @@ const TextWithTooltip: React.FC<TextWithTooltip> = ({ status, isAdmin, text }) =
         )}
       >
         {text}
+        {textArray}
       </Typography>
     </Tooltip>
   ) : (

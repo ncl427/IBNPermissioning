@@ -8,12 +8,11 @@ import useTransaction from './useTransaction';
 import { arrayInclude, areArrayEqual, areMapEqual } from '../../util/array';
 // Constants
 import { PENDING_ADDITION, PENDING_REMOVAL, FAIL_ADDITION, FAIL_REMOVAL } from '../../constants/transactions';
-import { BigNumber } from 'ethers/utils';
 
 type IdentAndStatus = {
   identifier: string;
-  policyRoles?: BigNumber[];
-  policyService?: BigNumber;
+  policyRoles?: string;
+  policyService?: string;
   policyProvider?: string;
   hashedInfo?: string;
   status: string;
@@ -63,7 +62,16 @@ export default <T>(originalList: (T & IdentAndStatus)[], identifierToParams: (id
 
     const updatedList = [...pending, ...derivedList];
 
-    if (!areArrayEqual(updatedList, list, ['identifier', 'status', 'hashedInfo', 'enrolled', 'idType'])) {
+    if (
+      !areArrayEqual(updatedList, list, [
+        'identifier',
+        'status',
+        'policyRoles',
+        'policyService',
+        'hashedInfo',
+        'policyProvider'
+      ])
+    ) {
       setList(updatedList);
     }
     if (!areMapEqual(updatedTransactions, transactions)) {

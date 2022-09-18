@@ -3,10 +3,11 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 // Components
 import PolicyTable from './Table';
-import AddModal from '../../containers/Modals/Add';
+import AddModal from '../../containers/Modals/AddPolicy';
 import RemoveModal from '../../containers/Modals/Remove';
 // Constants
 import { addPolicyDisplay, removePolicyDisplay } from '../../constants/modals';
+//import { BigNumber } from 'ethers/utils';
 
 type PolicyTab = {
   list: any[];
@@ -16,11 +17,13 @@ type PolicyTab = {
     lock: boolean;
   };
   toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
-  handleAdd: (value: any) => Promise<void>;
+  handleAdd: (value: string[], value2: string, value3: string) => Promise<void>;
   handleRemove: (value: any) => Promise<void>;
   isAdmin: boolean;
   deleteTransaction: (identifier: string) => void;
-  isValid: (address: string) => { valid: boolean };
+  isValidString: (value: string) => { valid: boolean };
+  //isValidBigNumber: (value: BigNumber) => { valid: boolean; };
+  isValidArray: (value: string[]) => { valid: boolean };
   isOpen: boolean;
   isReadOnly: boolean;
 };
@@ -33,7 +36,9 @@ const PolicyTab: React.FC<PolicyTab> = ({
   handleRemove,
   isAdmin,
   deleteTransaction,
-  isValid,
+  isValidString,
+  //isValidBigNumber,
+  isValidArray,
   isOpen,
   isReadOnly
 }) => (
@@ -52,7 +57,8 @@ const PolicyTab: React.FC<PolicyTab> = ({
           closeModal={() => toggleModal('add')(false)}
           handleAdd={handleAdd}
           display={addPolicyDisplay}
-          isValid={isValid}
+          isValidString={isValidString}
+          isValidArray={isValidArray}
         />
         <RemoveModal
           isOpen={Boolean(modals.remove) && isAdmin}
@@ -78,7 +84,8 @@ PolicyTab.propTypes = {
   handleRemove: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   deleteTransaction: PropTypes.func.isRequired,
-  isValid: PropTypes.func.isRequired,
+  isValidString: PropTypes.func.isRequired,
+  isValidArray: PropTypes.func.isRequired,
   isReadOnly: PropTypes.bool.isRequired
 };
 

@@ -32,10 +32,10 @@ type PolicyTabContainerProps = {
 };
 
 type Policy = {
-  policyId: BigNumber;
+  policyId: string;
   identifier: string;
-  policyRoles?: BigNumber[];
-  policyService?: BigNumber;
+  policyRoles?: string;
+  policyService?: string;
   policyProvider?: string;
   hashedInfo?: string;
   status: string;
@@ -47,36 +47,36 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
-    (identifier: string) => ({ policyId: new BigNumber(identifier) })
+    (identifier: string) => ({ policyId: identifier })
   );
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
   if (!!policyRulesContract) {
-    const handleAdd = async (value: string) => {
+    const handleAdd = async (value: string[], value2: string, value3: string) => {
       try {
-        const tx = await policyRulesContract!.functions.addPolicy([1, 2], 1, value, '');
+        const tx = await policyRulesContract!.functions.addPolicy(value, value2, value3, '');
         toggleModal('add')(false);
-        addTransaction(value, PENDING_ADDITION);
+        addTransaction(value2, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
         const addEvent = receipt.events!.filter(e => e.event && e.event === 'PolicyAdded').pop();
         if (!addEvent) {
-          openToast(value, FAIL, `Error while processing policy: ${value}`);
+          openToast(value2, FAIL, `Error while processing policy: ${value}`);
         } else {
           const addSuccessResult = idx(addEvent, _ => _.args[0]);
           if (addSuccessResult === undefined) {
-            openToast(value, FAIL, `Error while adding policy: ${value}`);
+            openToast(value2, FAIL, `Error while adding policy: ${value2}`);
           } else if (Boolean(addSuccessResult)) {
-            openToast(value, SUCCESS, `New policy added: ${value}`);
+            openToast(value2, SUCCESS, `New policy added: ${value2}`);
           } else {
-            openToast(value, FAIL, `Policy "${value}" is already added`);
+            openToast(value2, FAIL, `Policy "${value2}" is already added`);
           }
         }
-        deleteTransaction(value);
+        deleteTransaction(value2);
       } catch (e) {
         toggleModal('add')(false);
-        updateTransaction(value, FAIL_ADDITION);
-        errorToast(e, value, openToast, () =>
-          openToast(value, FAIL, 'Could not add policy', `${value} was unable to be added. Please try again.`)
+        updateTransaction(value2, FAIL_ADDITION);
+        errorToast(e, value2, openToast, () =>
+          openToast(value2, FAIL, 'Could not add policy', `${value2} was unable to be added. Please try again.`)
         );
       }
     };
@@ -101,20 +101,56 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
       }
     };
 
-    const isValidPolicy = (address: string) => {
-      let isValidAddress = isAddress(address);
-      if (!isValidAddress) {
+    //Validate the Policy Name
+    const isValidPolicy = (name: string) => {
+      let isValidPolicy = true;
+      if (!isValidPolicy) {
         return {
           valid: false
         };
       }
 
       let isDuplicatePolicy =
-        list.filter((item: Policy) => address.toLowerCase() === item.identifier.toLowerCase()).length > 0;
+        list.filter((item: Policy) => name.toLowerCase() === item.policyId?.toLowerCase()).length > 0;
+      if (isDuplicatePolicy) {
+        return {
+          valid: false,
+          msg: 'Policy is already added.'
+        };
+      }
+
+      return {
+        valid: true
+      };
+    }; //Validate the Policy Type
+    const isValidPolicy2 = (address: string) => {
+      let isValidPolicy = true;
+      if (!isValidPolicy) {
+        return {
+          valid: false
+        };
+      }
+
+      /*       let isDuplicatePolicy =
+        list.filter((item: Policy) => address.toString() === item.identifier.toLowerCase()).length > 0;
       if (isDuplicatePolicy) {
         return {
           valid: false,
           msg: 'Policy address is already added.'
+        };
+      } */
+
+      return {
+        valid: true
+      };
+    };
+
+    //Validate the Policy attributes
+    const isValidPolicy3 = (attribute: string[]) => {
+      let isValidPolicy = true;
+      if (!isValidPolicy) {
+        return {
+          valid: false
         };
       }
 
@@ -134,7 +170,8 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}
-          isValid={isValidPolicy}
+          isValidString={isValidPolicy}
+          isValidArray={isValidPolicy3}
           isOpen={isOpen}
           isReadOnly={isReadOnly!}
         />
