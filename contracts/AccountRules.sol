@@ -115,7 +115,7 @@ contract AccountRules is AccountRulesProxy, AccountRulesList {
     string memory idType
   ) external onlyAdmin onlyOnEditMode returns (bool) {
     bool updated = updateIdentityInfo(account, hashedInfo, enrolled, idType);
-    emit AccountUpdatedTypes(accountUpdated, accountAddress, accountType, enrolled, accountRoles);
+    emit AccountUpdatedTypes(updated, account, idType, enrolled);
 
     return updated;
   }

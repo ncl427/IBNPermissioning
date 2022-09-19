@@ -33,8 +33,7 @@ contract AccountRulesList {
     bool accountUpdated,
     address accountAddress,
     string accountType,
-    bool enrolled,
-    uint256[] accountRoles
+    bool enrolled
   );
 
   event AccountRemoved(bool accountRemoved, address accountAddress);

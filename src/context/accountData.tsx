@@ -100,14 +100,21 @@ export const AccountDataProvider: React.FC<{}> = props => {
         setAccountRulesContract(contract);
         contract.removeAllListeners('AccountAdded');
         contract.removeAllListeners('AccountRemoved');
-        contract.removeAllListeners('AccountUpdated');
+        contract.removeAllListeners('AccountUpdatedTypes');
+        contract.removeAllListeners('AccountUpdatedRoles');
         contract.on('AccountAdded', (success, account, event) => {
           if (success) {
             loadAccountData(contract, setAccountList, setAccountReadOnly);
             //console.log("LIST: ", accountList);
           }
         });
-        contract.on('AccountUpdated', (success, account, event) => {
+        contract.on('AccountUpdatedTypes', (success, account, event) => {
+          if (success) {
+            loadAccountData(contract, setAccountList, setAccountReadOnly);
+            //console.log("LIST: ", accountList);
+          }
+        });
+        contract.on('AccountUpdatedRoles', (success, account, event) => {
           if (success) {
             loadAccountData(contract, setAccountList, setAccountReadOnly);
             //console.log("LIST: ", accountList);
