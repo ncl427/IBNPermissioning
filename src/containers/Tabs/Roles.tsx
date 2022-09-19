@@ -41,7 +41,7 @@ type Role = {
 
 const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, policyRulesContract } = useRoleData();
+  const { allowlist, isReadOnly, dataReady, policyRulesContract, roleTypes } = useRoleData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
@@ -50,9 +50,15 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
   // console.log("LIST!: ",allowlist);
   console.log('LIST#: ', list);
   if (!!policyRulesContract) {
-    const handleAdd = async (value: string, value2: string, value3: string[]) => {
+    const handleAdd = async (value: string, value2: string /* , value3: string[] */) => {
       try {
-        const tx = await policyRulesContract!.functions.addRole(value, value2, value3);
+        let newList: string[] = [];
+        let typeAtt: string = '';
+        const myType = roleTypes.find(({ roleTypeId }) => roleTypeId == value2);
+        console.log('ROLE TYPES', myType);
+        typeAtt = myType?.roleTypeAttributes || '';
+        newList.push(typeAtt);
+        const tx = await policyRulesContract!.functions.addRole(value, value2, newList);
         toggleModal('add')(false);
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
@@ -87,7 +93,7 @@ const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
         openToast(value, SUCCESS, `Removal of role processed: ${value}`);
-        deleteZitiIdentity(value);
+        //deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
         console.log('error', e);

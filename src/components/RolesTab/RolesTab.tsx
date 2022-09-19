@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import RolesTable from './Table';
 import AddModal from '../../containers/Modals/AddRole';
 import RemoveModal from '../../containers/Modals/Remove';
+import ViewModal from '../../containers/Modals/ViewRole';
 // Constants
-import { addRoleDisplay, removeRoleDisplay } from '../../constants/modals';
+import { addRoleDisplay, removeRoleDisplay, viewRolesDisplay } from '../../constants/modals';
 //import { BigNumber } from 'ethers/utils';
 
 type RolesTab = {
@@ -15,9 +16,10 @@ type RolesTab = {
     add: boolean;
     remove: boolean | string;
     lock: boolean;
+    view?: boolean | string;
   };
-  toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
-  handleAdd: (value: string, value2: string, value3: string[]) => Promise<void>;
+  toggleModal: (name: 'add' | 'remove' | 'lock' | 'view') => (value?: boolean | string) => void;
+  handleAdd: (value: string, value2: string /* , value3: string[] */) => Promise<void>;
   handleRemove: (value: any) => Promise<void>;
   isAdmin: boolean;
   deleteTransaction: (identifier: string) => void;
@@ -67,6 +69,12 @@ const RolesTab: React.FC<RolesTab> = ({
           handleRemove={handleRemove}
           display={removeRoleDisplay(modals.remove)}
         />
+        <ViewModal
+          isOpen={Boolean(modals.view) && isAdmin}
+          value={modals.view}
+          closeModal={() => toggleModal('view')(false)}
+          display={viewRolesDisplay(modals.view || '')}
+        />
       </Fragment>
     )}
   </Fragment>
@@ -77,7 +85,8 @@ RolesTab.propTypes = {
   modals: PropTypes.shape({
     add: PropTypes.bool.isRequired,
     remove: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]).isRequired,
-    lock: PropTypes.bool.isRequired
+    lock: PropTypes.bool.isRequired,
+    view: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]).isRequired
   }).isRequired,
   toggleModal: PropTypes.func.isRequired,
   handleAdd: PropTypes.func.isRequired,

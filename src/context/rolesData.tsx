@@ -13,12 +13,20 @@ type Role = {
   roleAttributes: string[];
 };
 
+type RoleType = {
+  roleTypeId: string;
+  roleTypeName: string;
+  roleTypeAttributes: string;
+};
+
 //type Role = { hashedInfo: string, enrolled: boolean };
 
 type ContextType =
   | {
       roleList: Role[];
       setRoleList: React.Dispatch<React.SetStateAction<Role[]>>;
+      roleTypes: RoleType[];
+      setRoleTypes: React.Dispatch<React.SetStateAction<RoleType[]>>;
       roleTypeList: string[];
       setRoleTypeList: React.Dispatch<React.SetStateAction<string[]>>;
       roleReadOnly?: boolean;
@@ -35,12 +43,14 @@ const RoleDataContext = createContext<ContextType>(undefined);
 const loadRoleData = (
   policyRulesContract: PolicyRules | undefined,
   setRoleList: (role: Role[]) => void,
+  setRoleTypes: (role: RoleType[]) => void,
   setRoleTypeList: (type: string[]) => void,
   setRoleReadOnly: (readOnly?: boolean) => void
 ) => {
   if (policyRulesContract === undefined) {
     setRoleList([]);
     setRoleTypeList([]);
+    setRoleTypes([]);
     setRoleReadOnly(undefined);
   } else {
     policyRulesContract.functions.isReadOnly().then(isReadOnly => setRoleReadOnly(isReadOnly));
@@ -92,38 +102,43 @@ const loadRoleData = (
         });
       });
     });
+
+    policyRulesContract.functions.roleTypesSize().then(listSize => {
+      const listElementsPromises: Promise<BigNumber>[] = [];
+      let listHashPromises: Promise<any>[] = [];
+      let listHashPromise2: Promise<any>[] = [];
+
+      for (let i = 0; listSize.gt(i); i++) {
+        listElementsPromises.push(policyRulesContract.functions.getRoleTypeByIndex(i));
+      }
+      Promise.all(listElementsPromises).then(responses1 => {
+        listHashPromises = responses1.map(roleTypeId => policyRulesContract.functions.getFullRoleTypeById(roleTypeId));
+        //setRoleList(responses1.map(address => ({ address })));
+        console.log('HASHEDInfoPol2: ', listHashPromises);
+
+        Promise.all(listHashPromises).then(responses2 => {
+          setRoleTypes(
+            responses2.map((role, i) => {
+              const idobject: RoleType = {
+                roleTypeId: '',
+                roleTypeName: '',
+                roleTypeAttributes: ''
+              };
+
+              idobject.roleTypeId = responses1[i].toString();
+              idobject.roleTypeName = role.roleTypeName;
+              idobject.roleTypeAttributes = role.roleTypeAttributes;
+
+              console.log('ROLETYPE', idobject);
+
+              return idobject;
+            })
+          );
+        });
+      });
+    });
   }
 };
-
-//  const loadExtraData = (
-//    policyRulesContract: PolicyRules | undefined,
-//    setHashList: (role: Role[]) => void) => {
-//    if (policyRulesContract === undefined) {
-//      setHashList([]);
-//    } else {
-//      policyRulesContract.functions.getSize().then(listSize => {
-//        const listElementsPromises : Promise<string>[] = [];
-//        let listHashPromises : Promise<any>[] = [];
-//        for (let i = 0; listSize.gt(i); i++) {
-//          listElementsPromises.push(policyRulesContract.functions.getByIndex(i));
-//        }
-//        Promise.all(listElementsPromises).then(responses => {
-//          console.log("Info: ", listElementsPromises );
-//          listHashPromises = responses.map(address =>  policyRulesContract.functions.getFullByAddress(address) );
-//          Promise.all(listHashPromises).then(responses => {
-//           console.log("HASHEDInfo: ", listHashPromises );
-//           setHashList(responses.map(role => {
-//              const idobject: Role = {hashedInfo: '', enrolled: false};
-//              idobject.enrolled = role.enrolled;
-//              idobject.hashedInfo = role.hashedInfo;
-//             return idobject;
-//           } ));
-//         });
-//        });
-
-//      });
-//    }
-//  };
 
 /**
  * Provider for the data context that contains the role list
@@ -134,6 +149,7 @@ const loadRoleData = (
  */
 export const RolesDataProvider: React.FC<{}> = props => {
   const [roleList, setRoleList] = useState<Role[]>([]);
+  const [roleTypes, setRoleTypes] = useState<RoleType[]>([]);
   const [roleTypeList, setRoleTypeList] = useState<string[]>([]);
   const [roleReadOnly, setRoleReadOnly] = useState<boolean | undefined>(undefined);
   const [policyRulesContract, setPolicyRulesContract] = useState<PolicyRules | undefined>(undefined);
@@ -142,6 +158,8 @@ export const RolesDataProvider: React.FC<{}> = props => {
     () => ({
       roleList: roleList,
       setRoleList: setRoleList,
+      roleTypes: roleTypes,
+      setRoleTypes: setRoleTypes,
       roleTypeList: roleTypeList,
       setRoleTypeList: setRoleTypeList,
       roleReadOnly,
@@ -152,6 +170,8 @@ export const RolesDataProvider: React.FC<{}> = props => {
     [
       roleList,
       setRoleList,
+      roleTypes,
+      setRoleTypes,
       roleTypeList,
       setRoleTypeList,
       roleReadOnly,
@@ -174,24 +194,24 @@ export const RolesDataProvider: React.FC<{}> = props => {
         contract.removeAllListeners('RoleUpdated');
         contract.on('RoleAdded', (success, role, event) => {
           if (success) {
-            loadRoleData(contract, setRoleList, setRoleTypeList, setRoleReadOnly);
+            loadRoleData(contract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly);
             //console.log("LIST: ", roleList);
           }
         });
         contract.on('RoleUpdated', (success, role, event) => {
           if (success) {
-            loadRoleData(contract, setRoleList, setRoleTypeList, setRoleReadOnly);
+            loadRoleData(contract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly);
             //console.log("LIST: ", roleList);
           }
         });
         contract.on('RoleRemoved', (success, role, event) => {
           if (success) {
-            loadRoleData(contract, setRoleList, setRoleTypeList, setRoleReadOnly);
+            loadRoleData(contract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly);
           }
         });
       });
     }
-  }, [policyIngressContract, setRoleList, setRoleTypeList, setRoleReadOnly]);
+  }, [policyIngressContract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly]);
 
   return <RoleDataContext.Provider value={value} {...props} />;
 };
@@ -212,12 +232,21 @@ export const useRoleData = () => {
     throw new Error('useRoleData must be used within an RolesDataProvider.');
   }
 
-  const { roleList, setRoleList, roleReadOnly, setRoleReadOnly, roleTypeList, setRoleTypeList, policyRulesContract } =
-    context;
+  const {
+    roleList,
+    setRoleList,
+    roleReadOnly,
+    setRoleReadOnly,
+    roleTypeList,
+    setRoleTypeList,
+    policyRulesContract,
+    roleTypes,
+    setRoleTypes
+  } = context;
   //console.log("LIST: ", roleList);
   useEffect(() => {
-    loadRoleData(policyRulesContract, setRoleList, setRoleTypeList, setRoleReadOnly);
-  }, [policyRulesContract, setRoleList, setRoleReadOnly]);
+    loadRoleData(policyRulesContract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly);
+  }, [policyRulesContract, setRoleList, setRoleTypes, setRoleTypeList, setRoleReadOnly]);
 
   const formattedRoleList = useMemo(() => {
     return roleList
@@ -233,6 +262,16 @@ export const useRoleData = () => {
   }, [roleList, roleTypeList]);
   console.log('ROLELIST1---------------: ', formattedRoleList);
 
+  const formattedRoleTypeList = useMemo(() => {
+    return roleTypes
+      .map((role, i) => ({
+        ...role,
+        identifier: role.roleTypeId.toString()
+      }))
+      .reverse();
+  }, [roleTypes]);
+  console.log('ROLELTYPES1---------------: ', roleTypes);
+
   const dataReady = useMemo(() => {
     return policyRulesContract !== undefined && roleReadOnly !== undefined && roleList !== undefined;
   }, [policyRulesContract, roleReadOnly, roleList, roleTypeList]);
@@ -240,6 +279,7 @@ export const useRoleData = () => {
   return {
     dataReady,
     allowlist: formattedRoleList,
+    roleTypes: roleTypes,
     isReadOnly: roleReadOnly,
     policyRulesContract
   };

@@ -20,6 +20,9 @@ tr td.emptyLine {
 }
 
 .row:hover {
+  .viewIcon {
+    opacity: 1;
+  }
   .removeIcon {
     opacity: 1;
   }
@@ -46,6 +49,19 @@ tr td.emptyLine {
 }
 
 .removeIcon {
+  opacity: 0;
+  transition: color 0.2s ease-in-out, opacity 0.5s ease-in-out;
+  &:hover {
+    color: #222;
+  }
+
+  &:focus {
+    opacity: 1;
+    color: #222;
+  }
+}
+
+.viewIcon {
   opacity: 0;
   transition: color 0.2s ease-in-out, opacity 0.5s ease-in-out;
   &:hover {

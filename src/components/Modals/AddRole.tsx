@@ -20,11 +20,11 @@ import { ModalDisplay } from '../../constants/modals';
 const AddModal: React.FC<{
   input: string;
   input2: string;
-  input3: string;
+  //input3: string;
   validationResult: { valid: boolean; msg?: string };
   modifyInput: (input: { target: { value: string } }) => void;
   modifyInput2: (input2: { target: { value: string } }) => void;
-  modifyInput3: (input3: { target: { value: string } }) => void;
+  //modifyInput3: (input3: { target: { value: string } }) => void;
   handleSubmit: (e: MouseEvent) => void;
   isOpen: boolean;
   closeModal: (e: MouseEvent) => void;
@@ -32,11 +32,11 @@ const AddModal: React.FC<{
 }> = ({
   input,
   input2,
-  input3,
+  //input3,
   validationResult,
   modifyInput,
   modifyInput2,
-  modifyInput3,
+  //modifyInput3,
   handleSubmit,
   isOpen,
   closeModal,
@@ -68,7 +68,7 @@ const AddModal: React.FC<{
         required
         fullWidth
       />
-      <TextField
+      {/*       <TextField
         label="Role Attributes"
         placeholder={display.input3Placeholder}
         value={input3}
@@ -76,7 +76,7 @@ const AddModal: React.FC<{
         className={styles.fieldInput}
         required
         fullWidth
-      />
+      /> */}
       <Typography
         gutterBottom
         className={
@@ -99,7 +99,7 @@ const AddModal: React.FC<{
 AddModal.propTypes = {
   input: PropTypes.string.isRequired,
   input2: PropTypes.string.isRequired,
-  input3: PropTypes.string.isRequired,
+  //input3: PropTypes.string.isRequired,
   validationResult: PropTypes.any.isRequired,
   modifyInput: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,

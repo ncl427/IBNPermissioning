@@ -18,6 +18,7 @@ type RoleRow = {
   status: string;
   isAdmin: boolean;
   deleteTransaction: (roleId: string) => void;
+  openViewModal: (roleId: string) => void;
   openRemoveModal: (roleId: string) => void;
 };
 
@@ -29,6 +30,7 @@ const RoleRow: React.FC<RoleRow> = ({
   roleAttributes,
   isAdmin,
   deleteTransaction,
+  openViewModal,
   openRemoveModal
 }) => (
   <TableRow className={styles.row}>
@@ -64,6 +66,14 @@ const RoleRow: React.FC<RoleRow> = ({
           <div />
         )}
         {isAdmin && status === 'active' && (
+          <Chip
+            label="view"
+            style={{ backgroundColor: 'teal' }}
+            className={styles.viewIcon}
+            onClick={() => openViewModal(roleId)}
+          />
+        )}
+        {isAdmin && status === 'active' && (
           <Chip className={styles.removeIcon} onDelete={() => openRemoveModal(roleId)} />
         )}
       </Grid>
@@ -75,7 +85,8 @@ RoleRow.propTypes = {
   status: PropTypes.string.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   deleteTransaction: PropTypes.func.isRequired,
-  openRemoveModal: PropTypes.func.isRequired
+  openRemoveModal: PropTypes.func.isRequired,
+  openViewModal: PropTypes.func.isRequired
 };
 
 export default RoleRow;

@@ -4,6 +4,8 @@ export type ModalDisplay = {
   heading: string;
   subHeading: string;
   label?: string;
+  label2?: string;
+  label3?: string;
   inputPlaceholder?: string;
   input2Placeholder?: string;
   input3Placeholder?: string;
@@ -66,6 +68,14 @@ export const addServiceDisplay: ModalDisplay = {
   heading: 'Add Service',
   subHeading: ''
 };
+
+export const viewRolesDisplay: (value: string | boolean | undefined) => ModalDisplay = value => ({
+  heading: `Role “${value}” Information`,
+  label: 'Role Name:',
+  label2: 'Role Type:',
+  label3: 'Role Attributes:',
+  subHeading: ''
+});
 
 export const removeAccountDisplay: (value: string | boolean) => ModalDisplay = value => ({
   heading: 'Are you sure?',

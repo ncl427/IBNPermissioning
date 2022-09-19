@@ -89,7 +89,7 @@ const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
         openToast(value, SUCCESS, `Removal of policy processed: ${value}`);
-        deleteZitiIdentity(value);
+        //deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
         console.log('error', e);

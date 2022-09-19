@@ -12,7 +12,7 @@ import styles from './styles.module.scss';
 
 type RolesTable = {
   list: { roleId: string; roleName: string; roleType: string; roleAttributes: string[]; status: string }[];
-  toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
+  toggleModal: (name: 'add' | 'remove' | 'lock' | 'view') => (value?: boolean | string) => void;
   deleteTransaction: (identifier: string) => void;
   isAdmin: boolean;
   isReadOnly: boolean;
@@ -38,18 +38,6 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
           </TableRow>
         </TableHead>
         <TableBody>
-          {/*          <TableRow>
-            <TableCell>IBN Manager</TableCell>
-            <TableCell>Admin</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Video Client</TableCell>
-            <TableCell>Subscriber</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Tester</TableCell>
-            <TableCell>OTA</TableCell>
-          </TableRow> */}
           {list.map(({ roleId, roleName, roleType, roleAttributes, status }) => (
             <RoleRow
               key={roleId}
@@ -60,6 +48,7 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
               status={status}
               isAdmin={isAdmin}
               deleteTransaction={deleteTransaction}
+              openViewModal={toggleModal('view')}
               openRemoveModal={toggleModal('remove')}
             />
           ))}
