@@ -89,7 +89,7 @@ contract AccountRules is AccountRulesProxy, AccountRulesList {
 
   function addAccount(address account) external onlyAdmin onlyOnEditMode returns (bool) {
     bool added = add(account);
-
+    emit AccountAdded(added, account);
     return added;
   }
 
