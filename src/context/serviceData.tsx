@@ -117,18 +117,19 @@ export const ServicesDataProvider: React.FC<{}> = props => {
         contract.on('ServiceAdded', (success, service, event) => {
           if (success) {
             loadServiceData(contract, setServiceList, setServiceReadOnly);
-            //console.log("LIST: ", serviceList);
+            console.log('EventAddded: ', service, event);
           }
         });
         contract.on('ServiceUpdated', (success, service, event) => {
           if (success) {
             loadServiceData(contract, setServiceList, setServiceReadOnly);
-            //console.log("LIST: ", serviceList);
+            console.log('LIST: ', serviceList);
           }
         });
         contract.on('ServiceRemoved', (success, service, event) => {
           if (success) {
             loadServiceData(contract, setServiceList, setServiceReadOnly);
+            console.log('EventRemoved: ', event);
           }
         });
       });

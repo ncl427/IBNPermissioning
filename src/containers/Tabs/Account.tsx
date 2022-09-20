@@ -20,6 +20,8 @@ import {
   PENDING_ADDITION,
   FAIL_ADDITION,
   PENDING_REMOVAL,
+  PENDING_UPDATE,
+  FAIL_UPDATE,
   FAIL_REMOVAL,
   SUCCESS,
   FAIL
@@ -94,6 +96,27 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
         updateTransaction(value, FAIL_REMOVAL);
         errorToast(e, value, openToast, () =>
           openToast(value, FAIL, 'Could not remove account', `${value} was unable to be removed. Please try again.`)
+        );
+      }
+    };
+
+    const handleAddRole = async (value: string, value2: string[]) => {
+      try {
+        const est = await accountRulesContract!.estimate.addRoleAccount(value, value2);
+        const tx = await accountRulesContract!.functions.addRoleAccount(value, value2, {
+          gasLimit: est.toNumber() * 2
+        });
+        toggleModal('view')(false);
+        addTransaction(value, PENDING_UPDATE);
+        await tx.wait(1); // wait on receipt confirmations
+        openToast(value, SUCCESS, `Update of identity processed: ${value}`);
+        deleteTransaction(value);
+      } catch (e) {
+        console.log('error', e);
+        toggleModal('view')(false);
+        updateTransaction(value, FAIL_UPDATE);
+        errorToast(e, value, openToast, () =>
+          openToast(value, FAIL, 'Could not update account', `${value} was unable to be updated. Please try again.`)
         );
       }
     };

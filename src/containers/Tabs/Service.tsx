@@ -57,6 +57,7 @@ const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => 
         addTransaction(value, PENDING_ADDITION);
         const receipt = await tx.wait(1); // wait on receipt confirmations
         const addEvent = receipt.events!.filter(e => e.event && e.event === 'ServiceAdded').pop();
+        console.log('MY ADD EVENT', addEvent);
         if (!addEvent) {
           openToast(value, FAIL, `Error while processing service: ${value}`);
         } else {
