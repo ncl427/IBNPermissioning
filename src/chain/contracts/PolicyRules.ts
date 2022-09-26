@@ -14,7 +14,7 @@ export const policyRulesFactory = async (ingressInstance: PolicyIngress) => {
   const policyRulesAddress2 = '0x5B4f1d099017Db37Cd3c6635dDc2028312221243';
 
   console.log('POLICY ADDRESS', policyRulesAddress, ingressInstance);
-  console.log('POLICY ADDRESS2', policyRulesAddress2);
+  //console.log('POLICY ADDRESS2', policyRulesAddress2);
 
   instance = new Contract(policyRulesAddress, PolicyRulesAbi.abi, ingressInstance.signer) as PolicyRules;
   return instance;
