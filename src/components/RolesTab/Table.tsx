@@ -6,6 +6,8 @@ import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, Tabl
 import RoleTableHeader from './TableHeader';
 import RoleRow from './Row';
 import EmptyRow from './EmptyRow';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 // Styles
 import styles from './styles.module.scss';
 //import { BigNumber } from 'ethers/utils';
@@ -38,7 +40,7 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(({ roleId, roleName, roleType, roleAttributes, status }) => (
+          {isAdmin ? list.map(({ roleId, roleName, roleType, roleAttributes, status }) => (
             <RoleRow
               key={roleId}
               roleId={roleId}
@@ -51,8 +53,8 @@ const RolesTable: React.FC<RolesTable> = ({ list, toggleModal, deleteTransaction
               openViewModal={toggleModal('view')}
               openRemoveModal={toggleModal('remove')}
             />
-          ))}
-          {list.length === 0 && <EmptyRow />}
+          )): <NotAdmin/>}
+          {list.length === 0 &&isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

@@ -31,12 +31,15 @@ const loadConfig = async (): Promise<Config> => {
     let nodeIngressAddress = process.env.REACT_APP_NODE_INGRESS_CONTRACT_ADDRESS;
     let policyIngressAddress = process.env.REACT_APP_ACCOUNT_INGRESS_CONTRACT_ADDRESS;
     let networkId = process.env.REACT_APP_CHAIN_ID;
-
+    
+    //To get the actual address of the policyIngress Contract - ONLY IF YOU DEPLOYED IT
     const policyIngressNetworks = Object.values(PolicyIngress.networks);
     if (policyIngressNetworks.length === 0) {
       throw new Error("Policy Ingress Contract abi doesn't contain any networks, probably not deployed");
     }
-    policyIngressAddress = (policyIngressNetworks[0] as { address: string }).address;
+     policyIngressAddress = (policyIngressNetworks[0] as { address: string }).address;
+
+    //
 
     console.log('Config Enviroment Addresses: ', accountIngressAddress, nodeIngressAddress, policyIngressAddress);
 

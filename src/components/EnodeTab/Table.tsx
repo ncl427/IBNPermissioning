@@ -6,6 +6,8 @@ import { TableContainer, Paper, Table, Box, TableHead, TableBody, TableRow, Tabl
 import EnodeTableHeader from './TableHeader';
 import EnodeRow from './Row';
 import EmptyRow from './EmptyRow';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 // Styles
 import styles from './styles.module.scss';
 import { Enode } from '../../util/enodetools';
@@ -34,7 +36,7 @@ const EnodeTable: React.FC<EnodeTable> = ({ list, toggleModal, deleteTransaction
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(enode => (
+          {isAdmin ? list.map(enode => (
             <EnodeRow
               key={enode.identifier}
               isAdmin={isAdmin}
@@ -42,8 +44,8 @@ const EnodeTable: React.FC<EnodeTable> = ({ list, toggleModal, deleteTransaction
               openRemoveModal={toggleModal('remove')}
               {...enode}
             />
-          ))}
-          {list.length === 0 && <EmptyRow />}
+          )) : <NotAdmin/>}
+          {list.length === 0 &&isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

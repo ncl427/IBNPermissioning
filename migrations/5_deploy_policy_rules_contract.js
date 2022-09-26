@@ -29,7 +29,6 @@ const initialAdminTypes  = [
 /* The address of the account ingress contract if pre-deployed */
 let policyIngress = process.env.POLICY_INGRESS_CONTRACT_ADDRESS;
 /* The address of the account storage contract if pre-deployed */
-let accountStorage = process.env.ACCOUNT_STORAGE_CONTRACT_ADDRESS;
 let policyStorage = process.env.POLICY_STORAGE_CONTRACT_ADDRESS;
 
 //let retainCurrentRulesContract = AllowlistUtils.getRetainAccountRulesContract();

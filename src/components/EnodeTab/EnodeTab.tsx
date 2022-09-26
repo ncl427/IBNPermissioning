@@ -7,6 +7,8 @@ import RemoveModal from '../../containers/Modals/Remove';
 // Constants
 import { addEnodeDisplay, removeEnodeDisplay } from '../../constants/modals';
 import { Enode } from '../../util/enodetools';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 
 type EnodeTab = {
   list: (Enode & { identifier: string; status: string })[];

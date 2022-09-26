@@ -6,6 +6,8 @@ import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, Tabl
 import PolicyTableHeader from './TableHeader';
 import PolicyRow from './Row';
 import EmptyRow from './EmptyRow';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 // Styles
 import styles from './styles.module.scss';
 //import { BigNumber } from 'ethers/utils';
@@ -44,7 +46,7 @@ const PolicyTable: React.FC<PolicyTable> = ({ list, toggleModal, deleteTransacti
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(({ policyId, policyRoles, policyService, policyProvider, status }) => (
+          {isAdmin ? list.map(({ policyId, policyRoles, policyService, policyProvider, status }) => (
             <PolicyRow
               key={policyId}
               policyId={policyId}
@@ -56,8 +58,8 @@ const PolicyTable: React.FC<PolicyTable> = ({ list, toggleModal, deleteTransacti
               deleteTransaction={deleteTransaction}
               openRemoveModal={toggleModal('remove')}
             />
-          ))}
-          {list.length === 0 && <EmptyRow />}
+          )): <NotAdmin/>}
+          {list.length === 0 &&isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

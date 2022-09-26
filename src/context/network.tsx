@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState, createContext, useMemo } from 'react';
 import { useConfig } from '../context/configData';
 
-import { providerFactory } from '../chain/provider';
+import { providerFactory, isThereProvider } from '../chain/provider';
 import { AccountIngress } from '../chain/@types/AccountIngress';
 import { accountIngressFactory } from '../chain/contracts/AccountIngress';
 import { NodeIngress } from '../chain/@types/NodeIngress';
@@ -12,17 +12,17 @@ import { policyIngressFactory } from '../chain/contracts/PolicyIngress';
 
 type ContextType =
   | {
-      networkId?: number;
-      setNetworkId: React.Dispatch<React.SetStateAction<number | undefined>>;
-      contracts: {
-        accountIngressContract?: AccountIngress;
-        setAccountIngressContract: React.Dispatch<React.SetStateAction<AccountIngress | undefined>>;
-        nodeIngressContract?: NodeIngress;
-        setNodeIngressContract: React.Dispatch<React.SetStateAction<NodeIngress | undefined>>;
-        policyIngressContract?: PolicyIngress;
-        setPolicyIngressContract: React.Dispatch<React.SetStateAction<PolicyIngress | undefined>>;
-      };
-    }
+    networkId?: number;
+    setNetworkId: React.Dispatch<React.SetStateAction<number | undefined>>;
+    contracts: {
+      accountIngressContract?: AccountIngress;
+      setAccountIngressContract: React.Dispatch<React.SetStateAction<AccountIngress | undefined>>;
+      nodeIngressContract?: NodeIngress;
+      setNodeIngressContract: React.Dispatch<React.SetStateAction<NodeIngress | undefined>>;
+      policyIngressContract?: PolicyIngress;
+      setPolicyIngressContract: React.Dispatch<React.SetStateAction<PolicyIngress | undefined>>;
+    };
+  }
   | undefined;
 
 const NetworkContext = createContext<ContextType>(undefined);
@@ -40,11 +40,22 @@ export const NetworkProvider: React.FC<{}> = props => {
   const config = useConfig();
 
   useEffect(() => {
-    providerFactory().then(provider => {
-      accountIngressFactory(config, provider).then(accountIngress => setAccountIngressContract(accountIngress));
-      policyIngressFactory(config, provider).then(policyIngress => setPolicyIngressContract(policyIngress));
-      nodeIngressFactory(config, provider).then(nodeIngress => setNodeIngressContract(nodeIngress));
+    isThereProvider().then(result => {
+      if (!result) {
+        console.log("METAMASK IS NOT INSTALLED")
+
+      }
+      else {
+
+
+        providerFactory().then(provider => {
+          accountIngressFactory(config, provider).then(accountIngress => setAccountIngressContract(accountIngress));
+          policyIngressFactory(config, provider).then(policyIngress => setPolicyIngressContract(policyIngress));
+          nodeIngressFactory(config, provider).then(nodeIngress => setNodeIngressContract(nodeIngress));
+        })
+      }
     });
+
   }, [config]);
 
   const value = useMemo(

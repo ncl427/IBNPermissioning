@@ -6,6 +6,8 @@ import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, Tabl
 import ServiceTableHeader from './TableHeader';
 import ServiceRow from './Row';
 import EmptyRow from './EmptyRow';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 // Styles
 import styles from './styles.module.scss';
 //import { BigNumber } from 'ethers/utils';
@@ -42,7 +44,7 @@ const ServicesTable: React.FC<ServicesTable> = ({ list, toggleModal, deleteTrans
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(({ serviceId, serviceName, serviceDescription, serviceConfig, status }) => (
+          {isAdmin ? list.map(({ serviceId, serviceName, serviceDescription, serviceConfig, status }) => (
             <ServiceRow
               key={serviceId}
               serviceId={serviceId}
@@ -54,8 +56,8 @@ const ServicesTable: React.FC<ServicesTable> = ({ list, toggleModal, deleteTrans
               deleteTransaction={deleteTransaction}
               openRemoveModal={toggleModal('remove')}
             />
-          ))}
-          {list.length === 0 && <EmptyRow />}
+          )): <NotAdmin/>}
+          {list.length === 0 && isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

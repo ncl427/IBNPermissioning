@@ -6,6 +6,7 @@ import { TableContainer, Paper, Table, Box, TableHead, TableRow, TableBody, Tabl
 import AccountTableHeader from './TableHeader';
 import AccountRow from './Row';
 import EmptyRow from './EmptyRow';
+import NotAdmin from '../NotAdmin/NotAdmin';
 // Styles
 import styles from './styles.module.scss';
 
@@ -35,7 +36,7 @@ const AccountTable: React.FC<AccountTable> = ({ list, toggleModal, deleteTransac
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map(({ address, status, hashedInfo, enrolled, idType }) => (
+          {isAdmin ? list.map(({ address, status, hashedInfo, enrolled, idType }) => (
             <AccountRow
               key={address}
               address={address}
@@ -47,8 +48,8 @@ const AccountTable: React.FC<AccountTable> = ({ list, toggleModal, deleteTransac
               deleteTransaction={deleteTransaction}
               openRemoveModal={toggleModal('remove')}
             />
-          ))}
-          {list.length === 0 && <EmptyRow />}
+          )) : <NotAdmin/> }
+          {list.length === 0 &&isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>
