@@ -39,7 +39,8 @@ const loadPolicyData = (
   setPolicyList: (policy: Policy[]) => void,
   setServiceList: (type: string[]) => void,
   setRoleList: (type: string[]) => void,
-  setPolicyReadOnly: (readOnly?: boolean) => void
+  setPolicyReadOnly: (readOnly?: boolean) => void,
+  //admin?: boolean
 ) => {
   if (policyRulesContract === undefined) {
     setPolicyList([]);
@@ -216,7 +217,7 @@ export const PolicyDataProvider: React.FC<{}> = props => {
  *  - isReadOnly: Policy contract is lock or unlock,
  *  - allowlist: list of permitted policies from Policy contract,
  */
-export const usePolicyData = () => {
+export const usePolicyData = (admin : boolean) => {
   const context = useContext(PolicyDataContext);
 
   if (!context) {
@@ -234,10 +235,14 @@ export const usePolicyData = () => {
     setRoleList,
     policyRulesContract
   } = context;
-  //console.log("LIST: ", policyList);
+  //console.log("AAADDMMMIN: ", admin);
+  
   useEffect(() => {
+  
     loadPolicyData(policyRulesContract, setPolicyList, setServiceList, setRoleList, setPolicyReadOnly);
-  }, [policyRulesContract, setPolicyList, setPolicyReadOnly]);
+  
+  }, [admin, policyRulesContract, setPolicyList, setPolicyReadOnly]);
+  
 
   const formattedPolicyList = useMemo(() => {
     return policyList

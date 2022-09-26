@@ -69,7 +69,7 @@ const RoleRow: React.FC<RoleRow> = ({
           <Chip
             label="view"
             style={{ backgroundColor: 'teal' }}
-            className={styles.viewIcon}
+            className={styles.pillView}
             onClick={() => openViewModal(roleId)}
           />
         )}

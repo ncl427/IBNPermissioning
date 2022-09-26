@@ -19,8 +19,22 @@ tr td.emptyLine {
   font-size: 13px;
 }
 
+.pillView {
+  border-radius: 15px;
+  opacity: 0;
+  width: auto;
+  height: 30px;
+  cursor: default;
+  font-weight: 600;
+  font-size: 13px;
+  &:hover {
+    color: rgb(234, 223, 223);
+    background: aqua;
+  }
+}
+
 .row:hover {
-  .viewIcon {
+  .pillView {
     opacity: 1;
   }
   .removeIcon {

@@ -9,7 +9,7 @@ import { useAdminData } from '../../context/adminData';
 // Utils
 import useTab from './useTabPolicy';
 import { errorToast } from '../../util/tabTools';
-import { deleteZitiIdentity } from '../../util/api';
+//import { deleteZitiIdentity } from '../../util/api';
 
 // Components
 import PolicyTab from '../../components/PolicyTab/PolicyTab';
@@ -43,7 +43,7 @@ type Policy = {
 
 const PolicyTabContainer: React.FC<PolicyTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, policyRulesContract } = usePolicyData();
+  const { allowlist, isReadOnly, dataReady, policyRulesContract } = usePolicyData(isAdmin);
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
     allowlist,
