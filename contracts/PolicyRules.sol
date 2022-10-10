@@ -187,19 +187,25 @@ contract PolicyRules is PolicyRulesList {
   // The following function is for getting all the policies
   function getAllPolicies() public view returns (Policies[] memory) {
     uint256 itemCount = policyStorage.policiesSize();
-    
+
     Policies[] memory items = new Policies[](itemCount);
     for (uint256 i = 0; i < itemCount; i++) {
       // I keep track of the policies in a mapping
       // It is saving the tokens of user in order
       uint256 policyId = policyStorage.getPolicyByIndex(i);
-      (uint256[] memory policyRoles, uint256 policyService, address policyProvider, string memory hashedInfo) = policyStorage.getFullPolicyById(policyId);
-      Policies memory item = Policies({policyId: policyId,
-            policyRoles: policyRoles,
-            policyService: policyService,
-            policyProvider: policyProvider,
-            hashedInfo: hashedInfo
-            });
+      (
+        uint256[] memory policyRoles,
+        uint256 policyService,
+        address policyProvider,
+        string memory hashedInfo
+      ) = policyStorage.getFullPolicyById(policyId);
+      Policies memory item = Policies({
+        policyId: policyId,
+        policyRoles: policyRoles,
+        policyService: policyService,
+        policyProvider: policyProvider,
+        hashedInfo: hashedInfo
+      });
       items[i] = item;
     }
     return items;
