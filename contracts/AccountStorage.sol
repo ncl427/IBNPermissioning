@@ -30,7 +30,7 @@ contract AccountStorage {
     AccountIngress private ingressContract;
 
 
-     //** Added Struct for keeping extra information of the accounts */ 
+     //** Added Struct for keeping extra information of the identities */ 
     struct identity {
         string hashedInfo;
         bool enrolled;
