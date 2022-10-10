@@ -401,6 +401,20 @@ contract PolicyStorage {
     return (roleTypes[roleTypeId].roleTypeName, roleTypes[roleTypeId].roleTypeAttributes);
   }
 
+  // The following function is for getting all the policies
+  function getAllPolicies() public view returns (Policies[] memory) {
+    uint256 itemCount = policylist.length;
+    Policies[] memory items = new Policies[](itemCount);
+    for (uint256 i = 0; i < itemCount; i++) {
+      // I keep track of the policies in a mapping
+      // It is saving the tokens of user in order
+      uint256 policyId = policylist[i];
+      Policies storage item = policies[policyId];
+      items[i] = item;
+    }
+    return items;
+  }
+
   function getPolicies() public view returns (uint256[] memory) {
     return policylist;
   }
