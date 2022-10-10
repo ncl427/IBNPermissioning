@@ -21,6 +21,8 @@ contract emailRepo {
         uint256 id;
         //Unique password -> Created from IBN
         string uniquePass;
+        //The publicKey of the employee
+        string pubKey;
         //The name of the employee
         address verAddress;
         //The name of the employee
@@ -102,6 +104,7 @@ contract emailRepo {
             id: repoCount,
             uniquePass: '',
             verAddress: 0x0000000000000000000000000000000000000000,
+            pubKey: '',
             empName: empName,
             email: email,
             employeId: employeId,
@@ -172,7 +175,7 @@ contract emailRepo {
     }
 
 
-    function getEmployeeByEmployeeId(uint256 _empId) public view returns(Repo memory){
+/*     function getEmployeeByEmployeeId(uint256 _empId) public view returns(Repo memory){
         require(
             msg.sender == guardian,
             'emailRepo::__acceptAdmin: sender must be repo guardian'
@@ -197,6 +200,17 @@ contract emailRepo {
         );
         uint256 id = getRepoIdFromEmail[_email];
         return repoList[id];
+    } */
+
+    function getPubKeyByAddress(address theAddress) public view returns(string memory){
+        require(
+            msg.sender == guardian,
+            'emailRepo::__acceptAdmin: sender must be repo guardian'
+        );
+        uint256 id = getRepoIdFromAddress[theAddress];    // Gets the Id of the requesting employee
+        Repo storage repo = repoList[id];
+
+        return repo.pubKey;
     }
 
     function cancel(uint256 repoId) public {
@@ -244,6 +258,21 @@ contract emailRepo {
         Repo storage repo = repoList[repoId];
         repo.verAddress = theAddress;
         getRepoIdFromAddress[theAddress] = repoId;
+    }
+
+    function updatePubKey(uint256 repoId, string memory pubKey) public {
+        repoState state = _state(repoId);
+        require(
+            state != repoState.Canceled,
+            'emailRepo::cancel: cannot update canceled repo'
+        );
+
+        require(
+            msg.sender == guardian,
+            'emailRepo::cancel: Only the admin can update a repo'
+        ); //Guardian or Proposal creator can cancel.
+        Repo storage repo = repoList[repoId];
+        repo.pubKey = pubKey;
     }
 
     function __abdicate() public {

@@ -1516,6 +1516,8 @@ contract sessionSmartContract is
     Ownable
 {
     using Strings for uint256;
+    uint counter;
+
 
     struct NftItem{
         uint256 tokenId;
@@ -1598,6 +1600,8 @@ contract sessionSmartContract is
         string memory _tokenType,
         string memory tokenURI_
     ) external onlyOwner {
+        counter++;
+        _tokenId = counter;
         _mint(_to, _tokenId);
         _setTokenURI(_tokenId, tokenURI_);
         _createNftItem(_tokenId, _tokenType);
