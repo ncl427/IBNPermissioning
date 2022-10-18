@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { AccountRules } from '../chain/@types/AccountRules';
 import { accountRulesFactory } from '../chain/contracts/AccountRules';
 import { useNetwork } from './network';
+import { BigNumber, BigNumberish } from 'ethers/utils';
 
-type Account = { address: string; hashedInfo: string; enrolled: boolean; idType: string };
+type Account = { address: string; hashedInfo: string; enrolled: boolean; idType: string; roles: string[] };
 //type Identity = { hashedInfo: string, enrolled: boolean };
 
 type ContextType =
@@ -50,11 +51,17 @@ const loadAccountData = (
           //console.log("HASHEDInfo: ", listIdentities );
           setAccountList(
             responses2.map((identity, i) => {
-              const idobject: Account = { address: '', hashedInfo: '', enrolled: false, idType: '' };
+              const idobject: Account = { address: '', hashedInfo: '', enrolled: false, idType: '', roles: [''] };
+              var array = [];
+              for (var d = 0; d < identity.roles.length; d++) {
+                array.push(identity.roles[d].toString());
+                console.log('BIIG NUMBEEERR ARRRRAYYYY_____________________', array, responses1[i]);
+              }
               idobject.address = responses1[i];
               idobject.enrolled = identity.enrolled;
               idobject.hashedInfo = identity.hashedInfo;
               idobject.idType = identity.idType;
+              idobject.roles = array;
               console.log('ACCOUNT', idobject);
               return idobject;
             })

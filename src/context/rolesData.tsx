@@ -278,7 +278,7 @@ export const useRoleData = () => {
 
   return {
     dataReady,
-    allowlist: formattedRoleList,
+    rolelist: formattedRoleList,
     roleTypes: roleTypes,
     isReadOnly: roleReadOnly,
     policyRulesContract

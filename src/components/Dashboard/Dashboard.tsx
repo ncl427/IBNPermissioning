@@ -33,10 +33,10 @@ const Dashboard: React.FC<Dashboard> = ({ tab, setTab }) => (
       <ToastProvider>
         <Toasts />
         <AdminDataProvider>
-          <AccountDataProvider>
-            <AccountTab isOpen={tab === ACCOUNT_TAB} />
-          </AccountDataProvider>
           <RolesDataProvider>
+            <AccountDataProvider>
+              <AccountTab isOpen={tab === ACCOUNT_TAB} />
+            </AccountDataProvider>
             <RoleTab isOpen={tab === ROLES_TAB} />
           </RolesDataProvider>
           <ServicesDataProvider>

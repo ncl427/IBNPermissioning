@@ -6,6 +6,7 @@ export type ModalDisplay = {
   label?: string;
   label2?: string;
   label3?: string;
+  label4?: string;
   inputPlaceholder?: string;
   input2Placeholder?: string;
   input3Placeholder?: string;
@@ -74,6 +75,15 @@ export const viewRolesDisplay: (value: string | boolean | undefined) => ModalDis
   label: 'Role Name:',
   label2: 'Role Type:',
   label3: 'Role Attributes:',
+  subHeading: ''
+});
+
+export const viewAccountsDisplay: (value: string | boolean | undefined) => ModalDisplay = value => ({
+  heading: `Identity “${value}” Information`,
+  label: 'Identity Name:',
+  label2: 'Identity Type:',
+  label3: 'Identity Hash',
+  label4: 'Roles:',
   subHeading: ''
 });
 
