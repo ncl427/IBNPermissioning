@@ -67,7 +67,7 @@ const AccountRow: React.FC<AccountRow> = ({
           <div />
         )}
         {/*enrolled === true && */}
-        {isAdmin && status === 'active' && (
+        {isAdmin && status === 'active' && enrolled === true && (
           <Chip
             label="Details"
             style={{ backgroundColor: 'teal' }}

@@ -21,7 +21,7 @@ const Wrapper = styled.div<{ raised?: boolean }>`
 
 export type Item = {
   id: string;
-  roleId?: string;
+  itemId?: string;
   value: string;
 };
 
@@ -140,7 +140,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
     <Wrapper raised={raised} onClick={onClickWrapper} ref={wrapperRef}>
       <SelectedItemsContainer>
         {selectedItems.length === 0 && <span>{placeholder} </span>}
-        {selectedItems.map(({ id, roleId, value }) => (
+        {selectedItems.map(({ id, itemId, value }) => (
           <Chip key={id} onClick={e => e.stopPropagation()}>
             {' '}
             <span>{value}</span>
@@ -160,12 +160,12 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       </SelectIcon>
       {filteredItems.length > 0 && (
         <DropDown opened={opened} raised={raised} wrapperClientHeight={wrapperClientHeight}>
-          {filteredItems.map(({ id, roleId, value }) => (
+          {filteredItems.map(({ id, itemId, value }) => (
             <li
               key={id}
               onClick={e => {
                 e.stopPropagation();
-                onDropDownClicked({ id, roleId, value });
+                onDropDownClicked({ id, itemId, value });
               }}
             >
               {' '}

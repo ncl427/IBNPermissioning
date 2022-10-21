@@ -29,19 +29,19 @@ export const removeAdminDisplay: (value: string | boolean) => ModalDisplay = val
 });
 
 export const addAccountDisplay: ModalDisplay = {
-  submitText: 'Add Account',
-  errorMessage: 'Account address is not valid.',
+  submitText: 'Add Identity',
+  errorMessage: 'Identity address is not valid.',
   inputPlaceholder: 'Ex: 0xAc03BB73b6a9e108530AFf4Df5077c2B3D481e5A',
-  label: 'Account Address',
-  heading: 'Add Account',
+  label: 'Identity Address',
+  heading: 'Add Identity',
   subHeading: ''
 };
 
 export const addPolicyDisplay: ModalDisplay = {
   submitText: 'Add Policy',
   errorMessage: 'Policy is not valid.',
-  inputPlaceholder: 'Ex: Role Ids separated by commas',
-  input2Placeholder: 'Ex: Service Id',
+  inputPlaceholder: 'Ex: 1',
+  input2Placeholder: 'Ex: 1',
   input3Placeholder: 'Ex: 0xAc03BB73b6a9e108530AFf4Df5077c2B3D481e5A',
   label: 'Adding policies to the ZT&T system',
   heading: 'Add Policy',
@@ -64,7 +64,7 @@ export const addServiceDisplay: ModalDisplay = {
   errorMessage: 'Service is not valid.',
   inputPlaceholder: 'Ex: Video',
   input2Placeholder: 'Ex: Description of the service',
-  input3Placeholder: 'Ex: Domain name and ports',
+  input3Placeholder: 'Ex: my.domain:port',
   label: 'Adding services to the ZT&T system',
   heading: 'Add Service',
   subHeading: ''
@@ -89,7 +89,7 @@ export const viewAccountsDisplay: (value: string | boolean | undefined) => Modal
 
 export const removeAccountDisplay: (value: string | boolean) => ModalDisplay = value => ({
   heading: 'Are you sure?',
-  subHeading: `Remove account “${value}”?`
+  subHeading: `Remove identity “${value}”?`
 });
 
 export const removePolicyDisplay: (value: string | boolean) => ModalDisplay = value => ({

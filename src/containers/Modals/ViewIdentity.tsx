@@ -11,7 +11,7 @@ import { BigNumber } from 'ethers/utils';
 
 type Item = {
   id: string;
-  roleId?: string;
+  itemId?: string;
   value: string;
 };
 
@@ -40,7 +40,7 @@ const ViewModalContainer: React.FC<{
    ]; */
   var items = [];
   for (var i = 0; i < rolelist.length; i++) {
-    items.push({ id: i + 1, roleId: rolelist[i].roleId, value: rolelist[i].roleName });
+    items.push({ id: i + 1, itemId: rolelist[i].roleId, value: rolelist[i].roleName });
   }
   console.log('RoleLists.........', items);
 
@@ -59,7 +59,7 @@ const ViewModalContainer: React.FC<{
     console.log('HANDLE ADD----------------------');
 
     for (var i = 0; i < itemsList.length; i++) {
-      items3.push(itemsList[i].roleId);
+      items3.push(itemsList[i].itemId);
     }
 
     handleAdd(myType?.address, items3);

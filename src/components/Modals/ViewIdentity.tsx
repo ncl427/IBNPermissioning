@@ -24,7 +24,7 @@ import { ModalDisplay } from '../../constants/modals';
 
 type Item = {
   id: string;
-  roleId?: string;
+  itemId?: string;
   value: string;
 };
 
@@ -53,9 +53,10 @@ const ViewModal: React.FC<{
   var selectedITems: any[] = [];
 
   for (var j = 0; j < roles.length; j++) {
-    const selectedItem = items.find(item => item.roleId === roles[j]);
-
-    selectedITems.push(selectedItem);
+    const selectedItem = items.find(item => item.itemId === roles[j]);
+    if (selectedItem != undefined) {
+      selectedITems.push(selectedItem);
+    }
   }
 
   console.log('PEEEEEEEEEEEEEEEEEEEEEEEEE-------', selectedITems);
@@ -84,7 +85,7 @@ const ViewModal: React.FC<{
           {display.label3}
         </DialogContentText>
         <Container className={styles.bold}>
-          <DialogContentText>{identityType}</DialogContentText>
+          <DialogContentText>0x28803646424f230242710320d53fe761589b467e2e0b8bd09f177bde6478d963</DialogContentText>
         </Container>
         <DialogContentText>
           {display.subHeading}
