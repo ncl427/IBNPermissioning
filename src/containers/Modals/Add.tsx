@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 // Components
 import AddModal from '../../components/Modals/Add';
 import { ModalDisplay } from '../../constants/modals';
-import { useRoleData } from '../../context/rolesData';
 
 const AddModalContainer: React.FC<{
   isOpen: boolean;
@@ -16,7 +15,6 @@ const AddModalContainer: React.FC<{
   const [input, setInput] = useState('');
   const [validation, setValidation] = useState({ valid: false });
 
-  const { roleTypes } = useRoleData();
   const modifyInput = ({ target: { value } }: { target: { value: string } }) => {
     const validation = isValid(value);
     setInput(value);

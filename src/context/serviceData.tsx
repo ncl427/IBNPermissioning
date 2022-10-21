@@ -179,7 +179,7 @@ export const useServiceData = () => {
 
   return {
     dataReady,
-    allowlist: formattedServiceList,
+    servicelist: formattedServiceList,
     isReadOnly: serviceReadOnly,
     policyRulesContract
   };

@@ -3,7 +3,7 @@ import React, { MouseEvent, useState } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { BigNumber, BigNumberish } from 'ethers/utils';
-import { MultiSelect } from '../MultiSelect';
+import { MultiSelect } from '../MultiSelect/MultiSelect';
 
 import {
   Dialog,
@@ -64,7 +64,7 @@ const ViewModal: React.FC<{
   return (
     <Dialog open={isOpen} onClose={closeModal} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">{display.heading}</DialogTitle>
-      <DialogContent>
+      <DialogContent dividers>
         <DialogContentText>
           {display.subHeading}
           {display.label}
