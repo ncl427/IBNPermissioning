@@ -10,7 +10,10 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  Typography
+  Typography,
+  Autocomplete,
+  InputLabel,
+  Grid
 } from '@material-ui/core';
 // Styles
 import styles from './styles.module.scss';
@@ -20,10 +23,12 @@ import { ModalDisplay } from '../../constants/modals';
 const AddModal: React.FC<{
   input: string;
   input2: string;
+  items: any[];
   //input3: string;
   validationResult: { valid: boolean; msg?: string };
   modifyInput: (input: { target: { value: string } }) => void;
   modifyInput2: (input2: { target: { value: string } }) => void;
+  handleChange: (event: any, newValue: string | null) => void;
   //modifyInput3: (input3: { target: { value: string } }) => void;
   handleSubmit: (e: MouseEvent) => void;
   isOpen: boolean;
@@ -32,10 +37,12 @@ const AddModal: React.FC<{
 }> = ({
   input,
   input2,
+  items,
   //input3,
   validationResult,
   modifyInput,
   modifyInput2,
+  handleChange,
   //modifyInput3,
   handleSubmit,
   isOpen,
@@ -44,7 +51,7 @@ const AddModal: React.FC<{
 }) => (
   <Dialog open={isOpen} onClose={closeModal} aria-labelledby="form-dialog-title">
     <DialogTitle id="form-dialog-title">{display.heading}</DialogTitle>
-    <DialogContent>
+    <DialogContent dividers>
       <DialogContentText>
         {display.subHeading}
         {display.label}
@@ -59,14 +66,22 @@ const AddModal: React.FC<{
         required
         fullWidth
       />
-      <TextField
-        label="Role Type Id"
-        placeholder={display.input2Placeholder}
-        value={input2}
-        onChange={modifyInput2}
-        className={styles.fieldInput}
-        required
-        fullWidth
+      {/*      <TextField
+          label="Role Type Id"
+          placeholder={display.input2Placeholder}
+          value={input2}
+          onChange={modifyInput2}
+          className={styles.fieldInput}
+          required
+          fullWidth
+        /> */}
+      <Autocomplete
+        disablePortal
+        id="role-types-combo"
+        options={items}
+        onChange={handleChange}
+        sx={{ width: 300 }}
+        renderInput={params => <TextField {...params} label="Role Types" />}
       />
       {/*       <TextField
         label="Role Attributes"
@@ -100,9 +115,11 @@ AddModal.propTypes = {
   input: PropTypes.string.isRequired,
   input2: PropTypes.string.isRequired,
   //input3: PropTypes.string.isRequired,
+  items: PropTypes.array.isRequired,
   validationResult: PropTypes.any.isRequired,
   modifyInput: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   display: PropTypes.any.isRequired

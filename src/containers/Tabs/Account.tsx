@@ -37,6 +37,7 @@ type Account = {
   hashedInfo?: string;
   enrolled?: boolean;
   idType?: string;
+  identityRoles?: string;
   status: string;
 };
 
@@ -102,6 +103,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
 
     const handleAddRole = async (value: string, value2: string[]) => {
       try {
+        console.log('ADDDD ROLEEEEE', value, value2);
         const est = await accountRulesContract!.estimate.addRoleAccount(value, value2);
         const tx = await accountRulesContract!.functions.addRoleAccount(value, value2, {
           gasLimit: est.toNumber() * 2
@@ -151,6 +153,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
           modals={modals}
           toggleModal={toggleModal}
           handleAdd={handleAdd}
+          handleAddRole={handleAddRole}
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}

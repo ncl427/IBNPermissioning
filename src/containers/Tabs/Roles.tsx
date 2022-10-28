@@ -41,13 +41,13 @@ type Role = {
 
 const RoleTabContainer: React.FC<RoleTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, policyRulesContract, roleTypes } = useRoleData();
+  const { rolelist, isReadOnly, dataReady, policyRulesContract, roleTypes } = useRoleData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
-    allowlist,
+    rolelist,
     (identifier: string) => ({ roleId: identifier })
   );
-  // console.log("LIST!: ",allowlist);
+  // console.log("LIST!: ",rolelist);
   console.log('LIST#: ', list);
   if (!!policyRulesContract) {
     const handleAdd = async (value: string, value2: string /* , value3: string[] */) => {

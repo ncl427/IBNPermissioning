@@ -12,7 +12,7 @@ import styles from './styles.module.scss';
 
 type AccountTable = {
   list: { address: string; status: string; hashedInfo: string; enrolled: boolean; idType: string }[];
-  toggleModal: (name: 'add' | 'remove' | 'lock') => (value?: boolean | string) => void;
+  toggleModal: (name: 'add' | 'remove' | 'lock' | 'view') => (value?: boolean | string) => void;
   deleteTransaction: (identifier: string) => void;
   isAdmin: boolean;
   isReadOnly: boolean;
@@ -36,20 +36,25 @@ const AccountTable: React.FC<AccountTable> = ({ list, toggleModal, deleteTransac
           </TableRow>
         </TableHead>
         <TableBody>
-          {isAdmin ? list.map(({ address, status, hashedInfo, enrolled, idType }) => (
-            <AccountRow
-              key={address}
-              address={address}
-              hashedInfo={hashedInfo}
-              enrolled={enrolled}
-              idType={idType}
-              status={status}
-              isAdmin={isAdmin}
-              deleteTransaction={deleteTransaction}
-              openRemoveModal={toggleModal('remove')}
-            />
-          )) : <NotAdmin/> }
-          {list.length === 0 &&isAdmin && <EmptyRow />}
+          {isAdmin ? (
+            list.map(({ address, status, hashedInfo, enrolled, idType }) => (
+              <AccountRow
+                key={address}
+                address={address}
+                hashedInfo={hashedInfo}
+                enrolled={enrolled}
+                idType={idType}
+                status={status}
+                isAdmin={isAdmin}
+                deleteTransaction={deleteTransaction}
+                openViewModal={toggleModal('view')}
+                openRemoveModal={toggleModal('remove')}
+              />
+            ))
+          ) : (
+            <NotAdmin />
+          )}
+          {list.length === 0 && isAdmin && <EmptyRow />}
         </TableBody>
       </Table>
     </TableContainer>

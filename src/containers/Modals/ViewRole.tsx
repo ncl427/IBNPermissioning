@@ -17,10 +17,10 @@ const ViewModalContainer: React.FC<{
   const [input, setInput] = useState('');
   const [input2, setInput2] = useState('');
   //const [input3, setInput3] = useState(['']);
-  const { allowlist } = useRoleData();
+  const { rolelist } = useRoleData();
   const [validation, setValidation] = useState({ valid: false });
 
-  const myType = allowlist.find(({ roleId }) => roleId == value);
+  const myType = rolelist.find(({ roleId }) => roleId == value);
   console.log('ROLE.........', myType);
 
   const handleClose = (e: MouseEvent) => {

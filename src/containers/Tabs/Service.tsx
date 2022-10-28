@@ -41,10 +41,10 @@ type Service = {
 
 const ServiceTabContainer: React.FC<ServiceTabContainerProps> = ({ isOpen }) => {
   const { isAdmin, dataReady: adminDataReady } = useAdminData();
-  const { allowlist, isReadOnly, dataReady, policyRulesContract } = useServiceData();
+  const { servicelist, isReadOnly, dataReady, policyRulesContract } = useServiceData();
 
   const { list, modals, toggleModal, addTransaction, updateTransaction, deleteTransaction, openToast } = useTab(
-    allowlist,
+    servicelist,
     (identifier: string) => ({ serviceId: identifier })
   );
   // console.log("LIST!: ",allowlist);

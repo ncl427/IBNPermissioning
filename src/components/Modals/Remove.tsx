@@ -13,7 +13,7 @@ const RemoveModal: React.FC<{
 }> = ({ closeModal, isOpen, handleSubmit, display }) => (
   <Dialog open={isOpen} onClose={closeModal} aria-labelledby="form-dialog-title">
     <DialogTitle id="form-dialog-title">{display.heading}</DialogTitle>
-    <DialogContent>
+    <DialogContent dividers>
       <DialogContentText>
         {display.subHeading} {display.label}
       </DialogContentText>
