@@ -14,7 +14,7 @@ var privateKey = process.env.BESU_NODE_PERM_KEY;
 var endpoint = process.env.BESU_NODE_PERM_ENDPOINT;
 console.log("THIS IS IT",endpoint)
 if (endpoint === undefined) {
-  endpoint = "http://127.0.0.1:8545";
+  endpoint = "http://172.18.102.169:9545";
 }
 
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
     },
     ganache: {
       host: '127.0.0.1',
-      port: 7545,
+      port: 8545,
       network_id: '*',
     }
   },

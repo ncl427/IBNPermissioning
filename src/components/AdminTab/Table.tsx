@@ -6,8 +6,11 @@ import { Table, Box, TableHead, TableRow, TableCell, TableBody } from '@material
 // Components
 import AdminTableHeader from './TableHeader';
 import AdminRow from './Row';
+import NotAdmin from '../NotAdmin/NotAdmin';
+
 // Styles
 import styles from './styles.module.scss';
+
 
 type AdminTable = {
   list: { address: string; status: string }[];
@@ -28,7 +31,7 @@ const AdminTable: React.FC<AdminTable> = ({ list, toggleModal, deleteTransaction
         </TableRow>
       </TableHead>
       <TableBody>
-        {list.map(({ address, status }) => (
+      {isAdmin ? list.map(({ address, status }) => (
           <AdminRow
             key={address}
             address={address}
@@ -38,7 +41,7 @@ const AdminTable: React.FC<AdminTable> = ({ list, toggleModal, deleteTransaction
             deleteTransaction={deleteTransaction}
             openRemoveModal={toggleModal('remove')}
           />
-        ))}
+        )): <NotAdmin/> }
       </TableBody>
     </Table>
   </Box>

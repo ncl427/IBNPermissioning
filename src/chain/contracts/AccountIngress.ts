@@ -10,5 +10,7 @@ export const accountIngressFactory = async (config: Config, provider: Provider |
   if (instance) return instance;
 
   instance = new Contract(config.accountIngressAddress, AccountIngressAbi.abi, provider) as AccountIngress;
+  console.log('ACCOUNT INGRESS INSTANCE', instance, config.accountIngressAddress);
+
   return instance;
 };

@@ -6,14 +6,16 @@ export default () => {
     add: boolean;
     remove: string;
     lock: boolean;
+    view?: string;
   }>({
     add: false,
     remove: '',
-    lock: false
+    lock: false,
+    view: ''
   });
 
   const toggleModal = useCallback(
-    (modal: 'add' | 'remove' | 'lock') => (value?: string | boolean) => {
+    (modal: 'add' | 'remove' | 'lock' | 'view') => (value?: string | boolean) => {
       setModals(modals => ({
         ...modals,
         [modal]: value ? value : !modals[modal]

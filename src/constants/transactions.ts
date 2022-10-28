@@ -4,6 +4,9 @@ export const FAIL_ADDITION = 'failAddition';
 export const PENDING_REMOVAL = 'pendingRemoval';
 export const FAIL_REMOVAL = 'failRemoval';
 
+export const PENDING_UPDATE = 'pendingUpdate';
+export const FAIL_UPDATE = 'failUpdate';
+
 export const PENDING_LOCK = 'pendingLock';
 
 export const PENDING = 'pendingTransaction';

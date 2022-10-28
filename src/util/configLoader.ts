@@ -1,9 +1,11 @@
 import AccountIngress from '../chain/abis/AccountIngress.json';
+import PolicyIngress from '../chain/abis/PolicyIngress.json';
 import NodeIngress from '../chain/abis/NodeIngress.json';
 
 export type Config = {
   accountIngressAddress: string;
   nodeIngressAddress: string;
+  policyIngressAddress: string;
   networkId: string;
 };
 
@@ -27,7 +29,19 @@ const loadConfig = async (): Promise<Config> => {
     // if env variables exists, then we will assume we are connecting to besu, otherwise we will assume ganache
     let accountIngressAddress = process.env.REACT_APP_ACCOUNT_INGRESS_CONTRACT_ADDRESS;
     let nodeIngressAddress = process.env.REACT_APP_NODE_INGRESS_CONTRACT_ADDRESS;
+    let policyIngressAddress = process.env.REACT_APP_ACCOUNT_INGRESS_CONTRACT_ADDRESS;
     let networkId = process.env.REACT_APP_CHAIN_ID;
+    
+    //To get the actual address of the policyIngress Contract - ONLY IF YOU DEPLOYED IT
+    const policyIngressNetworks = Object.values(PolicyIngress.networks);
+    if (policyIngressNetworks.length === 0) {
+      throw new Error("Policy Ingress Contract abi doesn't contain any networks, probably not deployed");
+    }
+     policyIngressAddress = (policyIngressNetworks[0] as { address: string }).address;
+
+    //
+
+    console.log('Config Enviroment Addresses: ', accountIngressAddress, nodeIngressAddress, policyIngressAddress);
 
     if (accountIngressAddress) {
       console.log('Using environment variables for contract addresses and network id');
@@ -40,7 +54,11 @@ const loadConfig = async (): Promise<Config> => {
         throw new Error('Network Id environment variable is missing');
       }
 
-      return { accountIngressAddress, nodeIngressAddress, networkId };
+      if (!policyIngressAddress) {
+        throw new Error('Policy Ingress Address environment variable is missing');
+      }
+
+      return { accountIngressAddress, nodeIngressAddress, policyIngressAddress, networkId };
     }
 
     console.log('Using truffle (develop) defaults');
@@ -58,12 +76,18 @@ const loadConfig = async (): Promise<Config> => {
     }
     nodeIngressAddress = (nodeIngressNetworks[0] as { address: string }).address;
 
+    //const policyIngressNetworks = Object.values(PolicyIngress.networks);
+    if (policyIngressNetworks.length === 0) {
+      throw new Error("Policy Ingress Contract abi doesn't contain any networks, probably not deployed");
+    }
+    policyIngressAddress = (policyIngressNetworks[0] as { address: string }).address;
+
     // if we haven't errored by this point then we're being driven by env and until we do it better we should accept any network
     const nodeIngressNetworkId = Object.keys(NodeIngress.networks)[0]
       ? (Object.keys(NodeIngress.networks)[0] as string)
       : 'any';
 
-    return { accountIngressAddress, nodeIngressAddress, networkId: nodeIngressNetworkId };
+    return { accountIngressAddress, nodeIngressAddress, policyIngressAddress, networkId: nodeIngressNetworkId };
   }
 };
 

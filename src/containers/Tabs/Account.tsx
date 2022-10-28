@@ -9,6 +9,8 @@ import { useAdminData } from '../../context/adminData';
 // Utils
 import useTab from './useTab';
 import { errorToast } from '../../util/tabTools';
+import { deleteZitiIdentity } from '../../util/api';
+
 // Components
 import AccountTab from '../../components/AccountTab/AccountTab';
 import LoadingPage from '../../components/LoadingPage/LoadingPage';
@@ -18,6 +20,8 @@ import {
   PENDING_ADDITION,
   FAIL_ADDITION,
   PENDING_REMOVAL,
+  PENDING_UPDATE,
+  FAIL_UPDATE,
   FAIL_REMOVAL,
   SUCCESS,
   FAIL
@@ -30,8 +34,10 @@ type AccountTabContainerProps = {
 type Account = {
   address: string;
   identifier: string;
-  hash?: string;
+  hashedInfo?: string;
   enrolled?: boolean;
+  idType?: string;
+  identityRoles?: string;
   status: string;
 };
 
@@ -43,7 +49,8 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
     allowlist,
     (identifier: string) => ({ address: identifier })
   );
-  console.log(list);
+  // console.log("LIST!: ",allowlist);
+  console.log('LIST#: ', list);
   if (!!accountRulesContract) {
     const handleAdd = async (value: string) => {
       try {
@@ -82,6 +89,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
         addTransaction(value, PENDING_REMOVAL);
         await tx.wait(1); // wait on receipt confirmations
         openToast(value, SUCCESS, `Removal of account processed: ${value}`);
+        deleteZitiIdentity(value);
         deleteTransaction(value);
       } catch (e) {
         console.log('error', e);
@@ -89,6 +97,28 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
         updateTransaction(value, FAIL_REMOVAL);
         errorToast(e, value, openToast, () =>
           openToast(value, FAIL, 'Could not remove account', `${value} was unable to be removed. Please try again.`)
+        );
+      }
+    };
+
+    const handleAddRole = async (value: string, value2: string[]) => {
+      try {
+        console.log('ADDDD ROLEEEEE', value, value2);
+        const est = await accountRulesContract!.estimate.addRoleAccount(value, value2);
+        const tx = await accountRulesContract!.functions.addRoleAccount(value, value2, {
+          gasLimit: est.toNumber() * 2
+        });
+        toggleModal('view')(false);
+        addTransaction(value, PENDING_UPDATE);
+        await tx.wait(1); // wait on receipt confirmations
+        openToast(value, SUCCESS, `Update of identity processed: ${value}`);
+        deleteTransaction(value);
+      } catch (e) {
+        console.log('error', e);
+        toggleModal('view')(false);
+        updateTransaction(value, FAIL_UPDATE);
+        errorToast(e, value, openToast, () =>
+          openToast(value, FAIL, 'Could not update account', `${value} was unable to be updated. Please try again.`)
         );
       }
     };
@@ -123,6 +153,7 @@ const AccountTabContainer: React.FC<AccountTabContainerProps> = ({ isOpen }) => 
           modals={modals}
           toggleModal={toggleModal}
           handleAdd={handleAdd}
+          handleAddRole={handleAddRole}
           handleRemove={handleRemove}
           isAdmin={isAdmin}
           deleteTransaction={deleteTransaction}

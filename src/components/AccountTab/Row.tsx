@@ -11,21 +11,25 @@ import styles from './styles.module.scss';
 
 type AccountRow = {
   address: string;
-  hash: string;
+  hashedInfo: string;
   enrolled: boolean;
+  idType: string;
   status: string;
   isAdmin: boolean;
   deleteTransaction: (address: string) => void;
+  openViewModal: (address: string) => void;
   openRemoveModal: (address: string) => void;
 };
 
 const AccountRow: React.FC<AccountRow> = ({
   address,
   status,
-  hash,
+  hashedInfo,
   enrolled,
+  idType,
   isAdmin,
   deleteTransaction,
+  openViewModal,
   openRemoveModal
 }) => (
   <TableRow className={styles.row}>
@@ -33,16 +37,18 @@ const AccountRow: React.FC<AccountRow> = ({
       <TextWithTooltip status={status} text={address} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
-      <TextWithTooltip status={status} text={hash} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={hashedInfo} isAdmin={isAdmin} />
     </TableCell>
     <TableCell>
-      <TextWithTooltip status={status} text={enrolled.toString()} isAdmin={isAdmin} />
+      <TextWithTooltip status={status} text={idType} isAdmin={isAdmin} />
     </TableCell>
 
     <TableCell>
       <Grid container justifyContent="space-between" alignItems="center">
-        {status === 'active' ? (
-          <Chip color="primary" className={styles.pill} label="Active" />
+        {status === 'active' && enrolled === true ? (
+          <Chip color="primary" className={styles.pill} label="Enrolled" />
+        ) : status === 'active' && enrolled === false ? (
+          <Chip color="default" style={{ backgroundColor: 'default' }} className={styles.pill} label="Not Enrolled" />
         ) : status === PENDING_ADDITION ? (
           <Chip color="secondary" className={styles.pill} label="Pending Addition" />
         ) : status === PENDING_REMOVAL ? (
@@ -59,6 +65,15 @@ const AccountRow: React.FC<AccountRow> = ({
           </Grid>
         ) : (
           <div />
+        )}
+        {/*enrolled === true && */}
+        {isAdmin && status === 'active' && enrolled === true && (
+          <Chip
+            label="Details"
+            style={{ backgroundColor: 'teal' }}
+            className={styles.pillView}
+            onClick={() => openViewModal(address)}
+          />
         )}
         {isAdmin && status === 'active' && (
           <Chip className={styles.removeIcon} onDelete={() => openRemoveModal(address)} />

@@ -14,6 +14,7 @@ const web3Factory = async () => {
   }
 
   web3 = new Web3(Web3.givenProvider);
+  console.log("WEB3", web3.currentProvider)
   return web3;
 };
 
@@ -21,9 +22,26 @@ export const providerFactory = async () => {
   if (provider) return provider;
 
   const web3 = await web3Factory();
-  provider = new ethers.providers.Web3Provider(web3.currentProvider as AsyncSendable).getSigner();
 
+  provider = new ethers.providers.Web3Provider(web3.currentProvider as AsyncSendable).getSigner();
   return provider;
+
+
+};
+
+export const isThereProvider = async () => {
+  const web3 = await web3Factory();
+  if (web3.currentProvider) {
+    return true;
+
+  }
+  else {
+    return false;
+
+  }
+
+
+
 };
 
 export const listenForAccountChange = async (callback: (address: string) => void) => {

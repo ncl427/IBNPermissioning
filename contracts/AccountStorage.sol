@@ -30,17 +30,19 @@ contract AccountStorage {
     AccountIngress private ingressContract;
 
 
-     //** Added Struct for keeping extra information of the accounts */ 
+     //** Added Struct for keeping extra information of the identities */ 
     struct identity {
         string hashedInfo;
         bool enrolled;
+        string idType;
+        uint[] roles;
     }
 
     address[] public allowlist;
     mapping (address => identity) public permInfo; //Holds the information of the permissioned address
     mapping (address => uint256) private indexOf; //1 based indexing. 0 means non-existent
 
-    constructor (AccountIngress _ingressContract) public {
+constructor (AccountIngress _ingressContract) {
         ingressContract = _ingressContract;
         add(msg.sender);
     }
@@ -80,10 +82,11 @@ contract AccountStorage {
         if (indexOf[_account] == 0) {
 
             identity memory newIdentity = identity({
-            hashedInfo: '',
-            enrolled: false
+            hashedInfo: 'None',
+            enrolled: false,
+            idType: 'undefined',
+            roles: new uint[](0)
             });
-
             allowlist.push(_account);
             indexOf[_account] = allowlist.length;
             permInfo[_account] = newIdentity;
@@ -112,7 +115,7 @@ contract AccountStorage {
         return false;
     }
     //** ADDED this function for modifying permissioned account information */
-    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled ) public onlyLatestVersion returns (bool) {
+    function updateIdentityInfo(address _account, string memory hashedInfo, bool enrolled, string memory idType ) public onlyLatestVersion returns (bool) {
         string memory empty = "";
         uint256 index = indexOf[_account];
         if (index > 0) {
@@ -122,7 +125,7 @@ contract AccountStorage {
             } 
              else
             {
-                updateIdentity(_account, hashedInfo);
+                updateIdentity(_account, hashedInfo, idType);
                 return true;
             }
 
@@ -136,11 +139,21 @@ contract AccountStorage {
         updateId.enrolled = enrolled;
     }
     //**Update function helper */
-    function updateIdentity(address _account, string memory hashedInfo ) private {
+    function updateIdentity(address _account, string memory hashedInfo, string memory idType ) private {
         identity storage updateId = permInfo[_account];
         updateId.hashedInfo = hashedInfo;
         updateId.enrolled = true;
+        updateId.idType = idType;
     }
+
+    //**Add Role to Identity Function */
+    function addRoleToIdentity(address _account, uint256[] memory roles) public onlyLatestVersion returns (bool)  {
+        identity storage updateId = permInfo[_account];
+        updateId.roles = roles;
+
+        return true;
+    }
+
 
     
 
@@ -150,8 +163,8 @@ contract AccountStorage {
     }
 
     //** ADDED this function for getting the information associated to an address */
-    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled  ) {
-        return (permInfo[account].hashedInfo, permInfo[account].enrolled);
+    function getFullByAddress(address account) public view returns (string memory hashedInfo, bool enrolled, string memory idType, uint256[] memory roles  ) {
+        return (permInfo[account].hashedInfo, permInfo[account].enrolled, permInfo[account].idType, permInfo[account].roles);
     }
 
     function getAccounts() public view returns (address[] memory){

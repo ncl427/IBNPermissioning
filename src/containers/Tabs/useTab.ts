@@ -11,8 +11,10 @@ import { PENDING_ADDITION, PENDING_REMOVAL, FAIL_ADDITION, FAIL_REMOVAL } from '
 
 type IdentAndStatus = {
   identifier: string;
-  hash?: string;
+  hashedInfo?: string;
   enrolled?: boolean;
+  idType?: string;
+  identityRoles?: string;
   status: string;
 };
 
@@ -60,7 +62,9 @@ export default <T>(originalList: (T & IdentAndStatus)[], identifierToParams: (id
 
     const updatedList = [...pending, ...derivedList];
 
-    if (!areArrayEqual(updatedList, list, ['identifier', 'status'])) {
+    if (
+      !areArrayEqual(updatedList, list, ['identifier', 'status', 'hashedInfo', 'enrolled', 'idType', 'identityRoles'])
+    ) {
       setList(updatedList);
     }
     if (!areMapEqual(updatedTransactions, transactions)) {
