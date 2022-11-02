@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import './AccountStorage.sol';
+import './IdentityStorage.sol';
 
 contract AccountRulesList {
   //** Added Struct for keeping extra information of the accounts */

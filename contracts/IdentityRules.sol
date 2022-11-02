@@ -15,10 +15,10 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import './AccountRulesProxy.sol';
-import './AccountRulesList.sol';
+import './IdentityRulesList.sol';
 import './AccountIngress.sol';
 import './Admin.sol';
-import './AccountStorage.sol';
+import './IdentityStorage.sol';
 
 contract AccountRules is AccountRulesProxy, AccountRulesList {
   // in read-only mode rules can't be added/removed

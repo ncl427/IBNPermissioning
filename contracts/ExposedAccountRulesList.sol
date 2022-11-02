@@ -14,8 +14,8 @@
  */
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./AccountRulesList.sol";
-import "./AccountStorage.sol";
+import "./IdentityRulesList.sol";
+import "./IdentityStorage.sol";
 
 
 contract ExposedAccountRulesList is AccountRulesList {
